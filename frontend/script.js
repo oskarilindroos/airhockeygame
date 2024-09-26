@@ -5,14 +5,14 @@ var Paddle = /** @class */ (function () {
         this.xPos = xPos;
         this.yPos = yPos;
     }
-    Paddle.prototype.draw = function (myCtx) {
-        if (!myCtx) {
+    Paddle.prototype.draw = function (ctx) {
+        if (!ctx) {
             return;
         }
-        myCtx.beginPath();
-        myCtx.arc(this.xPos, this.yPos, this.radius, 0, 2 * Math.PI);
-        myCtx.fillStyle = this.color;
-        myCtx.fill();
+        ctx.beginPath();
+        ctx.arc(this.xPos, this.yPos, this.radius, 0, 2 * Math.PI);
+        ctx.fillStyle = this.color;
+        ctx.fill();
     };
     return Paddle;
 }());
@@ -20,7 +20,14 @@ var canvas = document.getElementById("gameWindow");
 var ctx = canvas.getContext("2d");
 var playAreaWidth = 200;
 var playAreaHeight = 400;
+var frameRate = 60;
+var clearScreen = function (ctx) {
+    ctx === null || ctx === void 0 ? void 0 : ctx.clearRect(0, 0, playAreaWidth, playAreaHeight);
+};
 canvas.width = playAreaWidth;
 canvas.height = playAreaHeight;
 var myPaddle = new Paddle(100, 100, 20, "black");
-myPaddle.draw(ctx);
+setInterval(function () {
+    clearScreen(ctx);
+    myPaddle.draw(ctx);
+}, 1000 / frameRate);

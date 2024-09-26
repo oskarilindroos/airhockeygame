@@ -11,16 +11,16 @@ class Paddle {
         this.yPos = yPos;
     }
 
-    draw(myCtx: CanvasRenderingContext2D | null): void {
+    draw(ctx: CanvasRenderingContext2D | null): void {
 
-        if (!myCtx){
+        if(!ctx){
             return
         }
 
-        myCtx.beginPath();
-        myCtx.arc(this.xPos, this.yPos, this.radius, 0, 2 * Math.PI);
-        myCtx.fillStyle = this.color;
-        myCtx.fill();
+        ctx.beginPath();
+        ctx.arc(this.xPos, this.yPos, this.radius, 0, 2 * Math.PI);
+        ctx.fillStyle = this.color;
+        ctx.fill();
     }
 }
 
@@ -30,8 +30,18 @@ const ctx = canvas.getContext("2d");
 const playAreaWidth = 200;
 const playAreaHeight = 400;
 
+const frameRate = 60;
+
+const clearScreen = (ctx: CanvasRenderingContext2D | null) =>{
+    ctx?.clearRect(0, 0, playAreaWidth, playAreaHeight);
+}
+
 canvas.width = playAreaWidth;
 canvas.height = playAreaHeight;
 
 const myPaddle = new Paddle(100, 100, 20, "black");
-myPaddle.draw(ctx);
+
+setInterval(() => {
+    clearScreen(ctx);
+    myPaddle.draw(ctx);
+}, 1000 / frameRate)
