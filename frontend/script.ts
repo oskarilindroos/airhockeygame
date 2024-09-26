@@ -30,16 +30,25 @@ const ctx = canvas.getContext("2d");
 const playAreaWidth = 200;
 const playAreaHeight = 400;
 
+
+
 const frameRate = 60;
 
 const clearScreen = (ctx: CanvasRenderingContext2D | null) =>{
     ctx?.clearRect(0, 0, playAreaWidth, playAreaHeight);
+    ctx?.beginPath();
+    ctx?.rect(0, 0, playAreaWidth, playAreaHeight);
+    ctx?.stroke()
 }
 
 canvas.width = playAreaWidth;
 canvas.height = playAreaHeight;
 
 const myPaddle = new Paddle(100, 100, 20, "black");
+window.addEventListener('mousemove', (cursor)=>{
+    myPaddle.xPos = cursor.pageX;
+    myPaddle.yPos = cursor.pageY;
+})
 
 setInterval(() => {
     clearScreen(ctx);
