@@ -21,14 +21,14 @@ var ctx = canvas.getContext("2d");
 var playAreaWidth = 200;
 var playAreaHeight = 400;
 var frameRate = 60;
+canvas.width = playAreaWidth;
+canvas.height = playAreaHeight;
 var clearScreen = function (ctx) {
     ctx === null || ctx === void 0 ? void 0 : ctx.clearRect(0, 0, playAreaWidth, playAreaHeight);
     ctx === null || ctx === void 0 ? void 0 : ctx.beginPath();
     ctx === null || ctx === void 0 ? void 0 : ctx.rect(0, 0, playAreaWidth, playAreaHeight);
     ctx === null || ctx === void 0 ? void 0 : ctx.stroke();
 };
-canvas.width = playAreaWidth;
-canvas.height = playAreaHeight;
 var myPaddle = new Paddle(100, 100, 20, "black");
 window.addEventListener('mousemove', function (cursor) {
     myPaddle.xPos = cursor.pageX;

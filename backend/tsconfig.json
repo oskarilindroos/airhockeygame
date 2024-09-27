@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+      "module": "CommonJS",  // CommonJS is the module system used by Node.js
+      "target": "ES6",       // Or whatever ES version you prefer
+      "esModuleInterop": true,
+      "moduleResolution": "node",
+      "types": ["node"],     // Ensure node types are included
+      "lib": ["ES6"]         // Ensure ES6 or a higher version of JS is supported
+    }
+  }
