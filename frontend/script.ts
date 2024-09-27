@@ -22,7 +22,9 @@ class Paddle {
         ctx.fillStyle = this.color;
         ctx.fill();
     }
-}
+};
+
+const ws = new WebSocket("ws://localhost:8080");
 
 const canvas = document.getElementById("gameWindow") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d");
@@ -40,13 +42,21 @@ const clearScreen = (ctx: CanvasRenderingContext2D | null) =>{
     ctx?.beginPath();
     ctx?.rect(0, 0, playAreaWidth, playAreaHeight);
     ctx?.stroke()
-}
+};
 
 const myPaddle = new Paddle(100, 100, 20, "black");
 window.addEventListener('mousemove', (cursor)=>{
     myPaddle.xPos = cursor.pageX;
     myPaddle.yPos = cursor.pageY;
-})
+});
+
+canvas.addEventListener('click', () =>{
+    ws.send("Hello from client");
+});
+
+ws.onmessage = message => {
+    console.log(`Received message "${message.data}", ${new Date(Date.now()).toLocaleTimeString()}`);
+};
 
 setInterval(() => {
     clearScreen(ctx);

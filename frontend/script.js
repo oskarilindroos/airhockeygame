@@ -16,6 +16,8 @@ var Paddle = /** @class */ (function () {
     };
     return Paddle;
 }());
+;
+var ws = new WebSocket("ws://localhost:8080");
 var canvas = document.getElementById("gameWindow");
 var ctx = canvas.getContext("2d");
 var playAreaWidth = 200;
@@ -34,6 +36,12 @@ window.addEventListener('mousemove', function (cursor) {
     myPaddle.xPos = cursor.pageX;
     myPaddle.yPos = cursor.pageY;
 });
+canvas.addEventListener('click', function () {
+    ws.send("Hello from client");
+});
+ws.onmessage = function (message) {
+    console.log("Received message \"".concat(message.data, "\", ").concat(new Date(Date.now()).toLocaleTimeString()));
+};
 setInterval(function () {
     clearScreen(ctx);
     myPaddle.draw(ctx);
