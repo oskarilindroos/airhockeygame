@@ -1,0 +1,25 @@
+.content {
+    display: flex;
+    flex-direction: column; /* Stack elements vertically */
+    align-items: center; /* Center content horizontally */
+    height: 100vh; /* Full viewport height */
+}
+
+.PlayArea {
+    display: flex;
+    justify-content: center; /* Center draggable ball */
+    align-items: center; /* Center draggable ball */
+    width: 50%; /* Set desired width */
+    height: 50vh; /* Set desired height */
+    border: 1px solid black; /* Border for the play area */
+    position: relative; /* Positioning context for Draggable */
+}
+
+.Ball {
+    width: 30px; /* Ball width */
+    height: 30px; /* Ball height */
+    background-color: lightgreen; /* Ball color */
+    border-radius: 50%; /* Make the ball circular */
+    cursor: move; /* Cursor changes to move when hovering over the ball */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Optional: adds shadow for depth */
+}
