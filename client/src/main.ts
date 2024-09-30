@@ -10,6 +10,27 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 const canvas = document.querySelector<HTMLCanvasElement>("#gameCanvas")!;
 const ctx = canvas.getContext("2d")!;
 
+const socket = new WebSocket("ws://localhost:8080");
+
+socket.onopen = () => {
+  console.log("Connected to the server");
+};
+
+socket.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  opponent.x = data.x;
+  opponent.y = data.y;
+  console.log("Message from server:", data);
+};
+
+socket.onclose = () => {
+  console.log("Disconnected from the server");
+};
+
+socket.onerror = (error) => {
+  console.error("Error:", error);
+};
+
 const player = new Player(canvas.width / 2, canvas.height - 40, 20, "green");
 const opponent = new Player(canvas.width / 2, 40, 20, "red");
 
@@ -53,10 +74,10 @@ canvas.addEventListener("mousemove", (event) => {
   const mouseX = event.clientX - rect.left; // Mouse X relative to the canvas
   const mouseY = event.clientY - rect.top; // Mouse Y relative to the canvas
 
-  console.log("mouseX", mouseX);
-  console.log("mouseY", mouseY);
-  console.log("player.x", player.x);
-  console.log("player.y", player.y);
+  // console.log("mouseX", mouseX);
+  // console.log("mouseY", mouseY);
+  // console.log("player.x", player.x);
+  // console.log("player.y", player.y);
 
   // Limits the player movement to the left and right boundaries of the canvas
   if (mouseX >= player.radius && mouseX + player.radius <= canvas.width) {
@@ -83,16 +104,6 @@ canvas.addEventListener("mousemove", (event) => {
     player.y = canvas.height - player.radius;
   }
 });
-
-// Simple AI for the opponent
-// Will be replaced with a real player
-const moveOpponent = () => {
-  if (opponent.x < player.x) {
-    opponent.x += 1;
-  } else {
-    opponent.x -= 1;
-  }
-};
 
 // TODO: Refactor these to separate file
 // Or the whole playing field could just be a texture that is loaded on top of the canvas
@@ -127,8 +138,6 @@ const update = () => {
   drawGoals();
   drawCenterLine();
   drawCenterCircle();
-
-  moveOpponent();
 
   // Draw the players at the new position
   player.draw(ctx);
