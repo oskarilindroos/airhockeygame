@@ -1,0 +1,21 @@
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Center vertically */
+    align-items: center; /* Center horizontally */
+    height: 100vh; /* Full viewport height */
+    background-color: #e0e0e0; /* Light gray background */
+}
+
+#gameCanvas {
+    border: 2px solid black; /* Add a black border around the canvas */
+    background-color: white; /* Set a white background color for better visibility */
+    display: block; /* Ensures proper centering */
+    margin-bottom: 2rem;
+}
+
+#scoreboard {
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 10px; /* Space between scoreboard and canvas */
+}

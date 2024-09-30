@@ -1,0 +1,1 @@
+(()=>{"use strict";const o=new WebSocket(`ws://${window.location.hostname}:8080`);o.onopen=()=>{console.log("Connected to server")},o.onmessage=o=>{console.log(`Server says: ${o.data}`)},o.onclose=()=>{console.log("Disconnected from server")}})();
