@@ -1,16 +1,30 @@
 import { Player } from "./Player";
 import "./style.css";
 
+type Coordinates = {
+  x: number,
+  y: number
+}
+
+let previousPos : Coordinates = {x:0, y:0};
+
 // Create the canvas element
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 <canvas width="300px" height="600px" id="gameCanvas">
   <p>Your browser does not support the canvas element.</p>
-</canvas>`;
+</canvas>
+<p>Mouse x speed: <span id="mouseX"></span> </p>
+<p>Mouse y speed: <span id="mouseY"></span> </p>
+`;
+
+const mouseXDisplay = document.getElementById("mouseX");
+const mouseYDisplay = document.getElementById("mouseY");
 
 const canvas = document.querySelector<HTMLCanvasElement>("#gameCanvas")!;
 const ctx = canvas.getContext("2d")!;
 
 const socket = new WebSocket("ws://localhost:8080");
+const framerate = 60
 
 socket.onopen = () => {
   console.log("Connected to the server");
@@ -68,7 +82,7 @@ canvas.addEventListener("touchmove", (event) => {
 });
 
 canvas.addEventListener("mousemove", (event) => {
-  if (!isMouseDown) return; // Only move player if mouse is held down
+  //if (!isMouseDown) return; // Only move player if mouse is held down
 
   const rect = canvas.getBoundingClientRect(); // Get canvas bounds
   const mouseX = event.clientX - rect.left; // Mouse X relative to the canvas
@@ -134,6 +148,22 @@ const drawGoals = () => {
 const update = () => {
   // Clear the canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const speedX = (player.x - previousPos.x);
+  const speedY = (player.y - previousPos.y);
+
+  if(speedX > 0 || speedY > 0){
+    console.log(`X spd: ${speedX}, Y spd: ${speedY}`)
+  }
+
+  if (!(mouseXDisplay == null || mouseYDisplay == null)){
+    mouseXDisplay.innerText = `${speedX}`;
+    mouseYDisplay.innerText = `${speedY}`;
+  }
+
+  previousPos = {x: player.x, y: player.y};
+
+
 
   drawGoals();
   drawCenterLine();
