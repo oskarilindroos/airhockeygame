@@ -1,12 +1,6 @@
 import { Player } from "./Player";
 import "./style.css";
 
-type Coordinates = {
-  x: number,
-  y: number
-}
-
-let previousPos : Coordinates = {x:0, y:0};
 
 // Create the canvas element
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
@@ -24,7 +18,6 @@ const canvas = document.querySelector<HTMLCanvasElement>("#gameCanvas")!;
 const ctx = canvas.getContext("2d")!;
 
 const socket = new WebSocket("ws://localhost:8080");
-const framerate = 60
 
 socket.onopen = () => {
   console.log("Connected to the server");
@@ -149,19 +142,19 @@ const update = () => {
   // Clear the canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  const speedX = (player.x - previousPos.x);
-  const speedY = (player.y - previousPos.y);
+  player.xSpeed = (player.x - player.previousPos.x);
+  player.ySpeed = (player.y - player.previousPos.y);
 
-  if(speedX > 0 || speedY > 0){
-    console.log(`X spd: ${speedX}, Y spd: ${speedY}`)
+  if(player.xSpeed > 0 || player.ySpeed > 0){
+    console.log(`X spd: ${player.xSpeed}, Y spd: ${player.ySpeed}`)
   }
 
   if (!(mouseXDisplay == null || mouseYDisplay == null)){
-    mouseXDisplay.innerText = `${speedX}`;
-    mouseYDisplay.innerText = `${speedY}`;
+    mouseXDisplay.innerText = `${player.xSpeed}`;
+    mouseYDisplay.innerText = `${player.ySpeed}`;
   }
 
-  previousPos = {x: player.x, y: player.y};
+  player.previousPos = {x: player.x, y: player.y};
 
 
 
