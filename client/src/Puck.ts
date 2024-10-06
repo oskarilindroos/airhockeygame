@@ -15,6 +15,12 @@ export class Puck extends GameObject {
         if (this.y <= this.radius || this.y >= canvas.height - this.radius){
             this.ySpeed *= -1;
         }
+
+        for (let player of players){
+            if (this.distance(player) <= this.radius + player.radius){
+                console.log(`Collision!`)
+            }
+        }
     }
 
     update(canvas: HTMLCanvasElement, players: GameObject[]){

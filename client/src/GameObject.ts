@@ -16,4 +16,10 @@ export class GameObject {
           ctx.fill();
           ctx.closePath();
         }
+
+        distance(other: GameObject){
+          const xDifference = this.x - other.x;
+          const yDifference = this.y - other.y;
+          return Math.sqrt(Math.pow(xDifference, 2) + Math.pow(yDifference, 2));
+        }
 }
