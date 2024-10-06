@@ -1,4 +1,5 @@
 import { Player } from "./Player";
+import { Puck } from "./Puck";
 import "./style.css";
 
 
@@ -40,6 +41,7 @@ socket.onerror = (error) => {
 
 const player = new Player(canvas.width / 2, canvas.height - 40, 20, "green");
 const opponent = new Player(canvas.width / 2, 40, 20, "red");
+const puck = new Puck(canvas.width / 2, canvas.height/2, 15, "black", 1, 0);
 
 let isMouseDown = false;
 
@@ -142,12 +144,10 @@ const update = () => {
   // Clear the canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+  puck.update(canvas, [player, opponent])
   player.xSpeed = (player.x - player.previousPos.x);
   player.ySpeed = (player.y - player.previousPos.y);
 
-  if(player.xSpeed > 0 || player.ySpeed > 0){
-    console.log(`X spd: ${player.xSpeed}, Y spd: ${player.ySpeed}`)
-  }
 
   if (!(mouseXDisplay == null || mouseYDisplay == null)){
     mouseXDisplay.innerText = `${player.xSpeed}`;
@@ -165,6 +165,7 @@ const update = () => {
   // Draw the players at the new position
   player.draw(ctx);
   opponent.draw(ctx);
+  puck.draw(ctx)
 
   requestAnimationFrame(update);
 };
