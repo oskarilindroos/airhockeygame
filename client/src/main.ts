@@ -1,4 +1,5 @@
 import { Player } from "./Player";
+import { Puck } from "./puck";
 import "./style.css";
 
 // Create the canvas element
@@ -33,6 +34,7 @@ socket.onerror = (error) => {
 
 const player = new Player(canvas.width / 2, canvas.height - 40, 20, "green");
 const opponent = new Player(canvas.width / 2, 40, 20, "red");
+const puck = new Puck(canvas.width / 2, canvas.height / 2, 15);
 
 let isMouseDown = false;
 
@@ -138,6 +140,12 @@ const update = () => {
   drawGoals();
   drawCenterLine();
   drawCenterCircle();
+
+  puck.update(canvas); // Update puck position
+  puck.draw(ctx); // Draw the puck
+
+  puck.checkCollisionWithPlayer(player);   // Check collision with the user-controlled player
+  puck.checkCollisionWithPlayer(opponent); // Check collision with the opponent
 
   // Draw the players at the new position
   player.draw(ctx);
