@@ -41,7 +41,7 @@ socket.onerror = (error) => {
 
 const player = new Player(canvas.width / 2, canvas.height - 40, 20, "green");
 const opponent = new Player(canvas.width / 2, 40, 20, "red");
-const puck = new Puck(canvas.width / 2, canvas.height/2, 15, "black", 1, 1);
+const puck = new Puck(canvas.width / 2, canvas.height/2 + 50, 15, "black", 0, 0);
 
 let isMouseDown = false;
 
