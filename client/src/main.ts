@@ -1,4 +1,6 @@
+import { drawCenterCircle, drawCenterLine, drawGoals } from "./graphics";
 import { Player } from "./Player";
+import { Puck } from "./Puck";
 import "./style.css";
 
 // Create the canvas element
@@ -31,8 +33,24 @@ socket.onerror = (error) => {
   console.error("Error:", error);
 };
 
-const player = new Player(canvas.width / 2, canvas.height - 40, 20, "green");
-const opponent = new Player(canvas.width / 2, 40, 20, "red");
+// Create the game objects
+const player = new Player();
+player.x = canvas.width / 2;
+player.y = canvas.height - 40;
+player.color = "green";
+player.radius = 20;
+
+const opponent = new Player();
+opponent.x = canvas.width / 2;
+opponent.y = 40;
+opponent.color = "red";
+opponent.radius = 20;
+
+const puck = new Puck();
+puck.x = canvas.width / 2;
+puck.y = canvas.height / 2;
+puck.color = "black";
+puck.radius = 16;
 
 let isMouseDown = false;
 
@@ -56,92 +74,30 @@ canvas.addEventListener("touchend", () => {
 });
 
 canvas.addEventListener("touchmove", (event) => {
-  event.preventDefault(); // Prevents scrolling the page
-  if (!isMouseDown) return;
-
-  canvas.dispatchEvent(
-    new MouseEvent("mousemove", {
-      clientX: event.touches[0].clientX,
-      clientY: event.touches[0].clientY,
-    }),
-  );
+  player.handleTouchMove(event, canvas, isMouseDown);
 });
 
 canvas.addEventListener("mousemove", (event) => {
-  if (!isMouseDown) return; // Only move player if mouse is held down
-
-  const rect = canvas.getBoundingClientRect(); // Get canvas bounds
-  const mouseX = event.clientX - rect.left; // Mouse X relative to the canvas
-  const mouseY = event.clientY - rect.top; // Mouse Y relative to the canvas
-
-  // console.log("mouseX", mouseX);
-  // console.log("mouseY", mouseY);
-  // console.log("player.x", player.x);
-  // console.log("player.y", player.y);
-
-  // Limits the player movement to the left and right boundaries of the canvas
-  if (mouseX >= player.radius && mouseX + player.radius <= canvas.width) {
-    player.x = mouseX;
-  } else if (mouseX < player.radius) {
-    // Keep the player from going off the left edge
-    player.x = player.radius;
-  } else {
-    // Prevent the player from going off the right edge
-    player.x = canvas.width - player.radius;
-  }
-
-  // Limits the player movement to the bottom half of the canvas
-  if (
-    mouseY >= canvas.height / 2 + player.radius &&
-    mouseY + player.radius <= canvas.height
-  ) {
-    player.y = mouseY;
-  } else if (mouseY < canvas.height / 2 + player.radius) {
-    // Keep the player at the top of the bottom half
-    player.y = canvas.height / 2 + player.radius;
-  } else {
-    // Prevent player from going below the canvas bottom
-    player.y = canvas.height - player.radius;
-  }
+  player.handleMouseMove(event, canvas, isMouseDown);
 });
 
-// TODO: Refactor these to separate file
-// Or the whole playing field could just be a texture that is loaded on top of the canvas
-const drawCenterLine = () => {
-  ctx.beginPath();
-  ctx.moveTo(0, canvas.height / 2);
-  ctx.lineTo(canvas.width, canvas.height / 2);
-  ctx.stroke();
-};
-const drawCenterCircle = () => {
-  ctx.beginPath();
-  ctx.arc(canvas.width / 2, canvas.height / 2, 50, 0, Math.PI * 2);
-  ctx.stroke();
-};
-const drawGoals = () => {
-  ctx.beginPath();
-  ctx.arc(canvas.width / 2, 0, 50, 0, Math.PI * 2);
-  ctx.stroke();
-  ctx.closePath();
-
-  ctx.beginPath();
-  ctx.arc(canvas.width / 2, canvas.height, 50, 0, Math.PI * 2);
-  ctx.stroke();
-  ctx.closePath();
+const renderGraphics = () => {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawGoals(canvas, ctx);
+  drawCenterLine(canvas, ctx);
+  drawCenterCircle(canvas, ctx);
+  puck.draw(ctx);
+  player.draw(ctx);
+  opponent.draw(ctx);
 };
 
 // Main game loop
 const update = () => {
-  // Clear the canvas
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  renderGraphics();
 
-  drawGoals();
-  drawCenterLine();
-  drawCenterCircle();
-
-  // Draw the players at the new position
-  player.draw(ctx);
-  opponent.draw(ctx);
+  puck.move();
+  puck.handleWallCollision(canvas);
+  puck.handlePlayerCollision(player);
 
   requestAnimationFrame(update);
 };
