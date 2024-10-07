@@ -7,7 +7,6 @@ const port = 8080;
 const server = http.createServer((request, response) => {
     console.log(`${new Date()} Received request for ${request.url}`);
     response.writeHead(404);
-    response.end();
 });
 
 // Listen on the specified port
