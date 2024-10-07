@@ -8,8 +8,6 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 <canvas width="300px" height="600px" id="gameCanvas">
   <p>Your browser does not support the canvas element.</p>
 </canvas>
-<p>Mouse x speed: <span id="mouseX"></span> </p>
-<p>Mouse y speed: <span id="mouseY"></span> </p>
 `;
 
 const mouseXDisplay = document.getElementById("mouseX");
