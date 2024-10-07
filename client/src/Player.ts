@@ -1,4 +1,9 @@
+import { Vector } from "./Vector";
+
 export class Player {
+  public xOld: number = 0;
+  public yOld: number = 0;
+
   constructor(
     public x: number,
     public y: number,
@@ -12,5 +17,9 @@ export class Player {
     ctx.fillStyle = this.color;
     ctx.fill();
     ctx.closePath();
+  }
+
+  velocity(){
+    return new Vector(this.x - this.xOld, this.y - this.yOld);
   }
 }
