@@ -1,5 +1,6 @@
 import { Player } from "./Player";
 import "./style.css";
+import { Ball } from "./Ball";
 
 // Create the canvas element
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
@@ -18,9 +19,9 @@ socket.onopen = () => {
 
 socket.onmessage = (event) => {
   const data = JSON.parse(event.data);
-  opponent.x = data.x;
-  opponent.y = data.y;
-  console.log("Message from server:", data);
+  //opponent.x = data.x;
+  //opponent.y = data.y;
+  //console.log("Message from server:", data);
 };
 
 socket.onclose = () => {
@@ -33,6 +34,7 @@ socket.onerror = (error) => {
 
 const player = new Player(canvas.width / 2, canvas.height - 40, 20, "green");
 const opponent = new Player(canvas.width / 2, 40, 20, "red");
+const ball = new Ball(canvas.width / 2, canvas.height / 2, 10, 3, 3, "blue");
 
 let isMouseDown = false;
 
@@ -73,11 +75,6 @@ canvas.addEventListener("mousemove", (event) => {
   const rect = canvas.getBoundingClientRect(); // Get canvas bounds
   const mouseX = event.clientX - rect.left; // Mouse X relative to the canvas
   const mouseY = event.clientY - rect.top; // Mouse Y relative to the canvas
-
-  // console.log("mouseX", mouseX);
-  // console.log("mouseY", mouseY);
-  // console.log("player.x", player.x);
-  // console.log("player.y", player.y);
 
   // Limits the player movement to the left and right boundaries of the canvas
   if (mouseX >= player.radius && mouseX + player.radius <= canvas.width) {
@@ -139,12 +136,28 @@ const update = () => {
   drawCenterLine();
   drawCenterCircle();
 
+  // Update player speed based on movement
+  player.updateSpeed();
+  opponent.updateSpeed();
+
+  // Check for collisions with the players and "kick" the ball if necessary
+  ball.checkCollision(player);
+  ball.checkCollision(opponent);
+
+  // Update and draw the ball
+  ball.update(canvas);
+  ball.draw(ctx);
+
   // Draw the players at the new position
   player.draw(ctx);
   opponent.draw(ctx);
 
   requestAnimationFrame(update);
 };
+
+// Start the game loop
+update();
+
 
 // Start the game loop
 update();
