@@ -1,6 +1,5 @@
 import { Player } from "./Player";
 import { Puck } from "./Puck"
-import { Vector } from "./Vector";
 import "./style.css";
 
 // Create the canvas element
@@ -165,7 +164,7 @@ const update = () => {
   // Draw the players at the new position<AAA<
   player.draw(ctx);
   //opponent.draw(ctx);
-  puck.draw(ctx, canvas.width, canvas.height);
+  puck.draw(ctx, canvas.width, canvas.height, false);
 
   requestAnimationFrame(update);
 };
