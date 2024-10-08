@@ -12,56 +12,7 @@ export class Puck {
         public color: string,
     ) { }
 
-    draw(ctx: CanvasRenderingContext2D, areaWidth: number, areaHeight: number, drawOnly: boolean) {
-
-        //We do the physics here
-        if (!drawOnly) {
-            this.friction = 0.0;
-            let hitWall: boolean = false;
-
-            //Stops puck from going out of bounds left
-            if ((this.x - this.radius) <= 0) {
-                this.x = 1 + this.radius;
-                this.velocity.x = -this.velocity.x;
-                hitWall = true; //Add a bit of friction
-            }
-
-            //Stops puck from going out of bounds right
-            if ((this.x + this.radius) >= areaWidth) {
-                this.x = areaWidth - 1 - this.radius;
-                this.velocity.x = -this.velocity.x;
-                hitWall = true; //Add a bit of friction
-            }
-
-            //Stops puck from going out of bounds top
-            if ((this.y - this.radius) <= 0) {
-                this.y = 1 + this.radius;
-                this.velocity.y = -this.velocity.y;
-                hitWall = true; //Add a bit of friction
-            }
-
-            //Stops puck from going out of bounds bottom
-            if ((this.y + this.radius) >= areaHeight) {
-                this.y = areaHeight - 1 - this.radius;
-                this.velocity.y = -this.velocity.y;
-                hitWall = true; //Add a bit of friction
-            }
-
-            //reduce puck velocity with friction
-            if (hitWall) {
-                this.friction = 0.2
-            }
-
-
-            //Add friction
-            this.velocity.x *= 1 - this.friction;
-            this.velocity.y *= 1 - this.friction;
-
-
-            //Add velocity
-            this.x = this.x + this.velocity.x;
-            this.y = this.y + this.velocity.y;
-        }
+    draw(ctx: CanvasRenderingContext2D) {
 
         //Draw the puck to it's location
         ctx.beginPath();
@@ -69,6 +20,55 @@ export class Puck {
         ctx.fillStyle = this.color;
         ctx.fill();
         ctx.closePath();
+    }
+
+    //Calculate position of the puck based on velocity
+    calcPosition(areaWidth: number, areaHeight: number){
+        this.friction = 0.0;
+        let hitWall: boolean = false;
+
+        //Stops puck from going out of bounds left
+        if ((this.x - this.radius) <= 0) {
+            this.x = 1 + this.radius;
+            this.velocity.x = -this.velocity.x;
+            hitWall = true; //Add a bit of friction
+        }
+
+        //Stops puck from going out of bounds right
+        if ((this.x + this.radius) >= areaWidth) {
+            this.x = areaWidth - 1 - this.radius;
+            this.velocity.x = -this.velocity.x;
+            hitWall = true; //Add a bit of friction
+        }
+
+        //Stops puck from going out of bounds top
+        if ((this.y - this.radius) <= 0) {
+            this.y = 1 + this.radius;
+            this.velocity.y = -this.velocity.y;
+            hitWall = true; //Add a bit of friction
+        }
+
+        //Stops puck from going out of bounds bottom
+        if ((this.y + this.radius) >= areaHeight) {
+            this.y = areaHeight - 1 - this.radius;
+            this.velocity.y = -this.velocity.y;
+            hitWall = true; //Add a bit of friction
+        }
+
+        //reduce puck velocity with friction
+        if (hitWall) {
+            this.friction = 0.2
+        }
+
+
+        //Add friction
+        this.velocity.x *= 1 - this.friction;
+        this.velocity.y *= 1 - this.friction;
+
+
+        //Add velocity
+        this.x = this.x + this.velocity.x;
+        this.y = this.y + this.velocity.y;         
     }
 
     hitCheck(player: Player) {

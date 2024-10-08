@@ -150,7 +150,9 @@ const update = () => {
 
   // Checks if one player hits the puck
   if (puck.hitCheck(player)) {
+    //Make sure no penetration happens
     puck.pen_res_bb(player);
+    //Add player velocity to puck
     puck.coll_res_bb(player);
   }
 
@@ -160,11 +162,13 @@ const update = () => {
   //  puck.coll_res_bb(opponent);
   //}
 
+  //Calculate what position the puck should be in in the frame
+  puck.calcPosition(canvas.width, canvas.height);
 
   // Draw the players at the new position<AAA<
   player.draw(ctx);
   opponent.draw(ctx);
-  puck.draw(ctx, canvas.width, canvas.height, false);
+  puck.draw(ctx);
 
   requestAnimationFrame(update);
 };
