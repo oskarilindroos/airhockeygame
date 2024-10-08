@@ -1,4 +1,5 @@
 import { Player } from "./Player";
+import { Puck } from "./Puck"
 import "./style.css";
 
 // Create the canvas element
@@ -20,7 +21,7 @@ socket.onmessage = (event) => {
   const data = JSON.parse(event.data);
   opponent.x = data.x;
   opponent.y = data.y;
-  console.log("Message from server:", data);
+  //console.log("Message from server:", data);
 };
 
 socket.onclose = () => {
@@ -33,6 +34,8 @@ socket.onerror = (error) => {
 
 const player = new Player(canvas.width / 2, canvas.height - 40, 20, "green");
 const opponent = new Player(canvas.width / 2, 40, 20, "red");
+
+const puck = new Puck(canvas.width / 2, canvas.height / 2 + 50, 15, "black");
 
 let isMouseDown = false;
 
@@ -81,12 +84,15 @@ canvas.addEventListener("mousemove", (event) => {
 
   // Limits the player movement to the left and right boundaries of the canvas
   if (mouseX >= player.radius && mouseX + player.radius <= canvas.width) {
+    player.xOld = player.x;
     player.x = mouseX;
   } else if (mouseX < player.radius) {
     // Keep the player from going off the left edge
+    player.xOld = player.x;
     player.x = player.radius;
   } else {
     // Prevent the player from going off the right edge
+    player.xOld = player.x;
     player.x = canvas.width - player.radius;
   }
 
@@ -95,12 +101,15 @@ canvas.addEventListener("mousemove", (event) => {
     mouseY >= canvas.height / 2 + player.radius &&
     mouseY + player.radius <= canvas.height
   ) {
+    player.yOld = player.y;
     player.y = mouseY;
   } else if (mouseY < canvas.height / 2 + player.radius) {
     // Keep the player at the top of the bottom half
+    player.yOld = player.y;
     player.y = canvas.height / 2 + player.radius;
   } else {
     // Prevent player from going below the canvas bottom
+    player.yOld = player.y;
     player.y = canvas.height - player.radius;
   }
 });
@@ -139,9 +148,27 @@ const update = () => {
   drawCenterLine();
   drawCenterCircle();
 
-  // Draw the players at the new position
+  // Checks if one player hits the puck
+  if (puck.hitCheck(player)) {
+    //Make sure no penetration happens
+    puck.pen_res_bb(player);
+    //Add player velocity to puck
+    puck.coll_res_bb(player);
+  }
+
+  // Check if opponent hits the puck
+  //if (puck.hitCheck(opponent)) {
+  //  puck.pen_res_bb(opponent);
+  //  puck.coll_res_bb(opponent);
+  //}
+
+  //Calculate what position the puck should be in in the frame
+  puck.calcPosition(canvas.width, canvas.height);
+
+  // Draw the players at the new position<AAA<
   player.draw(ctx);
   opponent.draw(ctx);
+  puck.draw(ctx);
 
   requestAnimationFrame(update);
 };
