@@ -163,7 +163,7 @@ const update = () => {
 
   // Draw the players at the new position<AAA<
   player.draw(ctx);
-  //opponent.draw(ctx);
+  opponent.draw(ctx);
   puck.draw(ctx, canvas.width, canvas.height, false);
 
   requestAnimationFrame(update);
