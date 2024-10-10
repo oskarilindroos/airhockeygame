@@ -1,3 +1,4 @@
+import { drawCenterCircle, drawCenterLine, drawGoals } from "./graphics";
 import { Player } from "./Player";
 import { Puck } from "./Puck"
 import "./style.css";
@@ -114,46 +115,21 @@ canvas.addEventListener("mousemove", (event) => {
   }
 });
 
-// TODO: Refactor these to separate file
-// Or the whole playing field could just be a texture that is loaded on top of the canvas
-const drawCenterLine = () => {
-  ctx.beginPath();
-  ctx.moveTo(0, canvas.height / 2);
-  ctx.lineTo(canvas.width, canvas.height / 2);
-  ctx.stroke();
-};
-const drawCenterCircle = () => {
-  ctx.beginPath();
-  ctx.arc(canvas.width / 2, canvas.height / 2, 50, 0, Math.PI * 2);
-  ctx.stroke();
-};
-const drawGoals = () => {
-  ctx.beginPath();
-  ctx.arc(canvas.width / 2, 0, 50, 0, Math.PI * 2);
-  ctx.stroke();
-  ctx.closePath();
-
-  ctx.beginPath();
-  ctx.arc(canvas.width / 2, canvas.height, 50, 0, Math.PI * 2);
-  ctx.stroke();
-  ctx.closePath();
-};
-
 // Main game loop
 const update = () => {
   // Clear the canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  drawGoals();
-  drawCenterLine();
-  drawCenterCircle();
+  drawGoals(canvas, ctx);
+  drawCenterLine(canvas, ctx);
+  drawCenterCircle(canvas, ctx);
 
   // Checks if one player hits the puck
   if (puck.hitCheck(player)) {
     //Make sure no penetration happens
-    puck.pen_res_bb(player);
+    puck.penetration_resolution_player(player);
     //Add player velocity to puck
-    puck.coll_res_bb(player);
+    puck.collision_response_player(player);
   }
 
   // Check if opponent hits the puck
