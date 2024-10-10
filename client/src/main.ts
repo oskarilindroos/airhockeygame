@@ -76,11 +76,11 @@ const update = () => {
   drawCenterCircle(canvas, ctx);
 
   // Checks if one player hits the puck
-  if (puck.hitCheck(player)) {
+  if (puck.playerCollisionCheck(player)) {
     //Make sure no puck/player penetration happens
-    puck.penetration_resolution_player(player);
+    puck.playerPenetrationResponse(player);
     //Add player velocity to puck
-    puck.collision_response_player(player);
+    puck.playerCollisionResponse(player);
   }
 
   // Check if opponent hits the puck

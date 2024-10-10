@@ -59,7 +59,12 @@ export class Puck extends GameObject {
         this.y = this.y + this.velocity.y;         
     }
 
-    hitCheck(player: Player) {
+    /**
+     * Checks if a player hits the puck 
+     * @param player 
+     * @returns true or false.
+     */
+    playerCollisionCheck(player: Player) {
         //Setup vectors
         let puckVec: Vector = new Vector(this.x, this.y);
         let hitVec: Vector = new Vector(player.x, player.y);
@@ -72,7 +77,7 @@ export class Puck extends GameObject {
      * Stops the puck from entering inside the player
      * @param player 
      */
-    penetration_resolution_player(player: Player) {
+    playerPenetrationResponse(player: Player) {
         //Setup vectors
         let puckVec: Vector = new Vector(this.x, this.y);
         let hitVec: Vector = new Vector(player.x, player.y);
@@ -95,7 +100,7 @@ export class Puck extends GameObject {
      * Transfer's the players vector to the puck in a realistic manner
      * @param player 
      */
-    collision_response_player(player: Player) {
+    playerCollisionResponse(player: Player) {
         //Setup vectors
         let puckVec: Vector = new Vector(this.x, this.y);
         let hitVec: Vector = new Vector(player.x, player.y);
