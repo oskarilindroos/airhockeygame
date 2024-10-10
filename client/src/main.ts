@@ -1,3 +1,4 @@
+import { drawCenterCircle, drawCenterLine, drawGoals } from "./graphics";
 import { Player } from "./Player";
 import { Puck } from "./Puck"
 import "./style.css";
@@ -34,7 +35,6 @@ socket.onerror = (error) => {
 
 const player = new Player(canvas.width / 2, canvas.height - 40, 20, "green");
 const opponent = new Player(canvas.width / 2, 40, 20, "red");
-
 const puck = new Puck(canvas.width / 2, canvas.height / 2 + 50, 15, "black");
 
 let isMouseDown = false;
@@ -59,107 +59,34 @@ canvas.addEventListener("touchend", () => {
 });
 
 canvas.addEventListener("touchmove", (event) => {
-  event.preventDefault(); // Prevents scrolling the page
-  if (!isMouseDown) return;
-
-  canvas.dispatchEvent(
-    new MouseEvent("mousemove", {
-      clientX: event.touches[0].clientX,
-      clientY: event.touches[0].clientY,
-    }),
-  );
+  player.handleTouchMove(event, canvas, isMouseDown);
 });
 
 canvas.addEventListener("mousemove", (event) => {
-  if (!isMouseDown) return; // Only move player if mouse is held down
-
-  const rect = canvas.getBoundingClientRect(); // Get canvas bounds
-  const mouseX = event.clientX - rect.left; // Mouse X relative to the canvas
-  const mouseY = event.clientY - rect.top; // Mouse Y relative to the canvas
-
-  // console.log("mouseX", mouseX);
-  // console.log("mouseY", mouseY);
-  // console.log("player.x", player.x);
-  // console.log("player.y", player.y);
-
-  // Limits the player movement to the left and right boundaries of the canvas
-  if (mouseX >= player.radius && mouseX + player.radius <= canvas.width) {
-    player.xOld = player.x;
-    player.x = mouseX;
-  } else if (mouseX < player.radius) {
-    // Keep the player from going off the left edge
-    player.xOld = player.x;
-    player.x = player.radius;
-  } else {
-    // Prevent the player from going off the right edge
-    player.xOld = player.x;
-    player.x = canvas.width - player.radius;
-  }
-
-  // Limits the player movement to the bottom half of the canvas
-  if (
-    mouseY >= canvas.height / 2 + player.radius &&
-    mouseY + player.radius <= canvas.height
-  ) {
-    player.yOld = player.y;
-    player.y = mouseY;
-  } else if (mouseY < canvas.height / 2 + player.radius) {
-    // Keep the player at the top of the bottom half
-    player.yOld = player.y;
-    player.y = canvas.height / 2 + player.radius;
-  } else {
-    // Prevent player from going below the canvas bottom
-    player.yOld = player.y;
-    player.y = canvas.height - player.radius;
-  }
+  player.handleMouseMove(event, canvas, isMouseDown);
 });
-
-// TODO: Refactor these to separate file
-// Or the whole playing field could just be a texture that is loaded on top of the canvas
-const drawCenterLine = () => {
-  ctx.beginPath();
-  ctx.moveTo(0, canvas.height / 2);
-  ctx.lineTo(canvas.width, canvas.height / 2);
-  ctx.stroke();
-};
-const drawCenterCircle = () => {
-  ctx.beginPath();
-  ctx.arc(canvas.width / 2, canvas.height / 2, 50, 0, Math.PI * 2);
-  ctx.stroke();
-};
-const drawGoals = () => {
-  ctx.beginPath();
-  ctx.arc(canvas.width / 2, 0, 50, 0, Math.PI * 2);
-  ctx.stroke();
-  ctx.closePath();
-
-  ctx.beginPath();
-  ctx.arc(canvas.width / 2, canvas.height, 50, 0, Math.PI * 2);
-  ctx.stroke();
-  ctx.closePath();
-};
 
 // Main game loop
 const update = () => {
   // Clear the canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  drawGoals();
-  drawCenterLine();
-  drawCenterCircle();
+  drawGoals(canvas, ctx);
+  drawCenterLine(canvas, ctx);
+  drawCenterCircle(canvas, ctx);
 
   // Checks if one player hits the puck
-  if (puck.hitCheck(player)) {
-    //Make sure no penetration happens
-    puck.pen_res_bb(player);
+  if (puck.playerCollisionCheck(player)) {
+    //Make sure no puck/player penetration happens
+    puck.playerPenetrationResponse(player);
     //Add player velocity to puck
-    puck.coll_res_bb(player);
+    puck.playerCollisionResponse(player);
   }
 
   // Check if opponent hits the puck
   //if (puck.hitCheck(opponent)) {
-  //  puck.pen_res_bb(opponent);
-  //  puck.coll_res_bb(opponent);
+  //  puck.penetration_resolution_player(opponent);
+  //  puck.collision_response_player(opponent);
   //}
 
   //Calculate what position the puck should be in in the frame

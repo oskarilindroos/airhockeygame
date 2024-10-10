@@ -1,28 +1,16 @@
 import { Vector } from "./Vector";
 import { Player } from "./Player";
+import { GameObject } from "./GameObject";
 
-export class Puck {
+export class Puck extends GameObject {
     public velocity: Vector = new Vector(0, 0);
     public friction: number = 0.0;
 
-    constructor(
-        public x: number,
-        public y: number,
-        public radius: number,
-        public color: string,
-    ) { }
-
-    draw(ctx: CanvasRenderingContext2D) {
-
-        //Draw the puck to it's location
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fillStyle = this.color;
-        ctx.fill();
-        ctx.closePath();
-    }
-
-    //Calculate position of the puck based on velocity
+    /**
+     * Calculates the location of the puck in the current frame based on velocity
+     * @param areaWidth 
+     * @param areaHeight 
+     */
     calcPosition(areaWidth: number, areaHeight: number){
         this.friction = 0.0;
         let hitWall: boolean = false;
@@ -71,7 +59,12 @@ export class Puck {
         this.y = this.y + this.velocity.y;         
     }
 
-    hitCheck(player: Player) {
+    /**
+     * Checks if a player hits the puck 
+     * @param player 
+     * @returns true or false.
+     */
+    playerCollisionCheck(player: Player) {
         //Setup vectors
         let puckVec: Vector = new Vector(this.x, this.y);
         let hitVec: Vector = new Vector(player.x, player.y);
@@ -80,8 +73,11 @@ export class Puck {
         return ((this.radius + player.radius) >= (puckVec.subtr(hitVec).mag()));
     }
 
-    //Stops penetration
-    pen_res_bb(player: Player) {
+    /**
+     * Stops the puck from entering inside the player
+     * @param player 
+     */
+    playerPenetrationResponse(player: Player) {
         //Setup vectors
         let puckVec: Vector = new Vector(this.x, this.y);
         let hitVec: Vector = new Vector(player.x, player.y);
@@ -100,8 +96,11 @@ export class Puck {
     }
 
 
-    //Sends the puck flying
-    coll_res_bb(player: Player) {
+    /**
+     * Transfer's the players vector to the puck in a realistic manner
+     * @param player 
+     */
+    playerCollisionResponse(player: Player) {
         //Setup vectors
         let puckVec: Vector = new Vector(this.x, this.y);
         let hitVec: Vector = new Vector(player.x, player.y);
