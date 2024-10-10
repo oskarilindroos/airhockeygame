@@ -6,7 +6,11 @@ export class Puck extends GameObject {
     public velocity: Vector = new Vector(0, 0);
     public friction: number = 0.0;
 
-    //Calculate position of the puck based on velocity
+    /**
+     * Calculates the location of the puck in the current frame based on velocity
+     * @param areaWidth 
+     * @param areaHeight 
+     */
     calcPosition(areaWidth: number, areaHeight: number){
         this.friction = 0.0;
         let hitWall: boolean = false;
@@ -64,7 +68,10 @@ export class Puck extends GameObject {
         return ((this.radius + player.radius) >= (puckVec.subtr(hitVec).mag()));
     }
 
-    //Stops penetration
+    /**
+     * Stops the puck from entering inside the player
+     * @param player 
+     */
     penetration_resolution_player(player: Player) {
         //Setup vectors
         let puckVec: Vector = new Vector(this.x, this.y);
@@ -84,7 +91,10 @@ export class Puck extends GameObject {
     }
 
 
-    //Sends the puck flying
+    /**
+     * Transfer's the players vector to the puck in a realistic manner
+     * @param player 
+     */
     collision_response_player(player: Player) {
         //Setup vectors
         let puckVec: Vector = new Vector(this.x, this.y);
