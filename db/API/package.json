@@ -2,11 +2,12 @@
   "name": "api",
   "version": "1.0.0",
   "description": "",
-  "main": "server.ts",
+  "main": "server.js",
   "type": "module",
   "scripts": {
+    "build": "npx tsc",
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "concurrently \"tsc -w\"  \"nodemon --env-file=../../.dev.env server.js\""
   },
   "keywords": [],
   "author": "",
@@ -20,6 +21,7 @@
   },
   "devDependencies": {
     "@types/mysql2": "github:types/mysql2",
+    "concurrently": "^9.0.1",
     "nodemon": "^3.1.7"
   }
 }
