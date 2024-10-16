@@ -3,19 +3,23 @@
   "version": "1.0.0",
   "description": "",
   "main": "server.ts",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon server.ts"
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.7.5",
     "express": "^4.21.1",
     "mysql2": "^3.11.3",
-    "@types/node": "^22.7.5"
+    "typescript": "^5.6.3"
   },
   "devDependencies": {
+    "@types/mysql2": "github:types/mysql2",
     "nodemon": "^3.1.7"
   }
 }
