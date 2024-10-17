@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { model } from "./model.js";
+import { QueryResult } from "mysql2";
 
 export const controller = {
 
@@ -7,7 +8,11 @@ export const controller = {
         try {
             const { url } = req.body;
             const response = await model.createRoom(url);
-            return res.status(201).json({message: "Room created"});
+
+            return res.status(201).json({
+                    roomID: response.insertId,
+                    url: url
+            })
 
         } catch (error: any) {
             console.error(error.message);
@@ -20,9 +25,9 @@ export const controller = {
             const { roomID } = req.params;
             const response = await model.deleteRoom(roomID);
 
-/*             if (result.affectedRows === 0) {
-                return res.status(404).json({ message: "Room not found" });
-            } */
+            if (response.affectedRows === 0) {
+                return res.status(404).json({ message: `Room ${roomID} not found` });
+            }
 
             return res.status(200).json({ message: "Room deleted successfully" });
         } catch (error: any) {
@@ -45,6 +50,9 @@ export const controller = {
         try {
             const { roomID } = req.params;
             const response = await model.getRoomByID(roomID);
+            if(response.length === 0){
+                return res.status(404).json({message: `Room ${roomID} not found`});
+            }
             return res.status(200).json(response);
         } catch (error: any) {
             console.error(error.message);
@@ -57,11 +65,11 @@ export const controller = {
             const { roomID } = req.params;
             const { statusID } = req.body;
 
-            const result = await model.updateRoomStatus(roomID, statusID);
+            const response = await model.updateRoomStatus(roomID, statusID);
 
-/*             if (result.affectedRows === 0) {
-                return res.status(404).json({ message: "Room not found" });
-            } */
+            if (response.affectedRows === 0) {
+                return res.status(404).json({ message: `Room ${roomID} not found` });
+            }
 
             return res.status(200).json({ message: `Room ${roomID} status updated to ${statusID}` });
         } catch (error: any) {

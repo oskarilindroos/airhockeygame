@@ -1,4 +1,4 @@
-import {execute} from "./pool.js"
+import {modifyData, selectData} from "./pool.js"
 
 export const model = {
 
@@ -8,7 +8,7 @@ export const model = {
                 'INSERT INTO `roomTable` (`url`) \
                 VALUES (?)';
 
-                return execute(query, [url]);
+                return modifyData(query, [url]);
         } catch (error: any) {
             throw error;
         }
@@ -20,7 +20,7 @@ export const model = {
                 'DELETE FROM `roomTable` \
                 WHERE `roomID` = ?';
 
-            return execute(query, [roomID]);
+            return modifyData(query, [roomID]);
 
         } catch (error: any) {
             throw error;
@@ -34,7 +34,7 @@ export const model = {
                 FROM `roomTable` JOIN `status` \
                 ON `roomTable`.`statusID` = `status`.`statusID`';
 
-            return execute(query);
+            return selectData(query);
 
         } catch (error: any) {
             throw error;
@@ -49,7 +49,7 @@ export const model = {
                 ON `roomTable`.`statusID` = `status`.`statusID` \
                 WHERE roomID = ?';
 
-            return execute(query, [roomID]);
+            return selectData(query, [roomID]);
 
         } catch (error: any) {
             throw error;
@@ -63,7 +63,7 @@ export const model = {
                 SET `statusID` = ? \
                 WHERE `roomID` = ?';
 
-            return execute(query, [statusID, roomID]);
+            return modifyData(query, [statusID, roomID]);
 
         } catch (error: any) {
             throw error;

@@ -13,7 +13,7 @@ GET {{server}}
 ###########
 # GET ROOM BY ID
 ###########
-GET {{server}}/1
+GET {{server}}/13
 
 ###########
 # CREATE ROOM
@@ -29,14 +29,14 @@ Content-Type: application/json
 #############
 # UPDATE ROOM
 ############
-PUT {{server}}/update/2
+PUT {{server}}/update/15
 Content-Type: application/json
 
 {
-    "statusID": "2"
+    "statusID": 2
 }
 
 #################
 # DELETE ROOM
 #################
-DELETE {{server}}/delete/3
+DELETE {{server}}/delete/13
