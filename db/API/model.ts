@@ -8,7 +8,8 @@ export const model = {
                 'DELETE FROM `roomTable` \
                 WHERE `roomID` = ?';
 
-            return execute(query, [roomID]);
+            const result = execute(query, [roomID]);
+            return result;
 
         } catch (error: any) {
             throw error;
