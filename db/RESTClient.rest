@@ -13,7 +13,7 @@ GET {{server}}
 ###########
 # GET ROOM BY ID
 ###########
-GET {{server}}/13
+GET {{server}}/15
 
 ###########
 # CREATE ROOM

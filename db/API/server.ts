@@ -1,8 +1,15 @@
 import express, {Express} from 'express';
+import cors from 'cors'
 import { router } from "./router.js";
+
+const acceptedOrigins = [
+ `${process.env.SERVER_ADDRESS}`
+]
+
 
 const app: Express = express();
 app.use(express.json());
+app.use(cors({origin: acceptedOrigins}));
 
 app.get('/rooms/health', (req: any, res: any) => {
     res.send('OK!')
