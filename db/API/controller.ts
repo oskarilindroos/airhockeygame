@@ -3,6 +3,18 @@ import { model } from "./model.js";
 
 export const controller = {
 
+    createRoom: async (req: Request, res: Response): Promise<any> => {
+        try {
+            const { url } = req.params;
+            const response = await model.createRoom(url);
+            return res.status(201);
+
+        } catch (error: any) {
+            console.error(error.message);
+            return res.status(500).json({ message: "Network or server error" });
+        }
+    },
+
     deleteRoom: async (req: Request, res: Response): Promise<any> => {
         try {
             const { roomID } = req.params;

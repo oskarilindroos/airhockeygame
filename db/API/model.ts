@@ -2,14 +2,25 @@ import {execute} from "./pool.js"
 
 export const model = {
 
+    createRoom: async (url: string) => {
+        try {
+            const query =
+                'INSERT INTO `roomTable` (`url`) \
+                VALUES (?)';
+
+                return execute(query, [url]);
+        } catch (error: any) {
+            throw error;
+        }
+    },
+
     deleteRoom: async (roomID: string) => {
         try {
             const query =
                 'DELETE FROM `roomTable` \
                 WHERE `roomID` = ?';
 
-            const result = execute(query, [roomID]);
-            return result;
+            return execute(query, [roomID]);
 
         } catch (error: any) {
             throw error;
