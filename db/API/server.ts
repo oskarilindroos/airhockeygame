@@ -2,6 +2,7 @@ import express, {Express} from 'express';
 import { router } from "./router.js";
 
 const app: Express = express();
+app.use(express.json());
 
 app.get('/rooms/health', (req: any, res: any) => {
     res.send('OK!')

@@ -5,9 +5,9 @@ export const controller = {
 
     createRoom: async (req: Request, res: Response): Promise<any> => {
         try {
-            const { url } = req.params;
+            const { url } = req.body;
             const response = await model.createRoom(url);
-            return res.status(201);
+            return res.status(201).json({message: "Room created"});
 
         } catch (error: any) {
             console.error(error.message);
@@ -63,7 +63,7 @@ export const controller = {
                 return res.status(404).json({ message: "Room not found" });
             } */
 
-            return res.status(200).json({ message: "Room status updated successfully" });
+            return res.status(200).json({ message: `Room ${roomID} status updated to ${statusID}` });
         } catch (error: any) {
             console.error(error.message);
             return res.status(500).json({ message: "Network or server error" });

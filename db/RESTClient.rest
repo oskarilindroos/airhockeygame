@@ -6,6 +6,37 @@
 GET {{server}}/health
 
 ###########
-# ALL ROOMS
+# GET ALL ROOMS
 ###########
 GET {{server}}
+
+###########
+# GET ROOM BY ID
+###########
+GET {{server}}/1
+
+###########
+# CREATE ROOM
+#############
+POST {{server}}/create
+Content-Type: application/json
+
+{
+    "url": "xyz.com"
+}
+
+
+#############
+# UPDATE ROOM
+############
+PUT {{server}}/update/2
+Content-Type: application/json
+
+{
+    "statusID": "2"
+}
+
+#################
+# DELETE ROOM
+#################
+DELETE {{server}}/delete/3
