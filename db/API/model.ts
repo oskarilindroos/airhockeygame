@@ -1,12 +1,60 @@
 import {execute} from "./pool.js"
 
 export const model = {
-    getAllRooms: async () =>{
+
+    deleteRoom: async (roomID: string) => {
         try {
-            return execute('SELECT * FROM `roomTable`');
-        } catch (error) {
+            const query =
+                'DELETE FROM `roomTable` \
+                WHERE `roomID` = ?';
+
+            return execute(query, [roomID]);
+
+        } catch (error: any) {
             throw error;
         }
+    },
 
+    getAllRooms: async () =>{
+        try {
+            const query =
+                'SELECT `roomID`, `url`, `createdAt`, `status` \
+                FROM `roomTable` JOIN `status` \
+                ON `roomTable`.`statusID` = `status`.`statusID`';
+
+            return execute(query);
+
+        } catch (error: any) {
+            throw error;
+        }
+    },
+
+    getRoomByID: async (roomID: string) => {
+        try {
+            const query =
+                'SELECT `roomID`, `url`, `createdAt`, `status` \
+                FROM `roomTable` JOIN `status` \
+                ON `roomTable`.`statusID` = `status`.`statusID` \
+                WHERE roomID = ?';
+
+            return execute(query, [roomID]);
+
+        } catch (error: any) {
+            throw error;
+        }
+    },
+
+    updateRoomStatus: async (roomID: string, statusID: string) => {
+        try {
+            const query =
+                'UPDATE `roomTable` \
+                SET `statusID` = ? \
+                WHERE `roomID` = ?';
+
+            return execute(query, [statusID, roomID]);
+
+        } catch (error: any) {
+            throw error;
+        }
     }
 }

@@ -1,7 +1,8 @@
+import { Request, Response } from "express";
 import { model } from "./model.js";
 
 export const controller = {
-    getAllRooms: async (_: any, res: any) =>{
+    getAllRooms: async (_: Request, res: Response) =>{
         try {
             const response = await model.getAllRooms();
             return res.status(200).json(response)

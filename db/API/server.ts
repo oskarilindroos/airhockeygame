@@ -1,9 +1,9 @@
-import express from 'express';
+import express, {Express} from 'express';
 import { router } from "./router.js";
 
-const app = (express as any)();
+const app: Express = express();
 
-app.get('/health', (req: any, res: any) => {
+app.get('/rooms/health', (req: any, res: any) => {
     res.send('OK!')
 })
 

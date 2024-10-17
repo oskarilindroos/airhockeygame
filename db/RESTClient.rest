@@ -1,0 +1,11 @@
+@server = http://localhost:5000/rooms
+
+##########
+# HEALTH
+############
+GET {{server}}/health
+
+###########
+# ALL ROOMS
+###########
+GET {{server}}
