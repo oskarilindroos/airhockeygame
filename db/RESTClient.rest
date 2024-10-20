@@ -1,0 +1,42 @@
+@server = http://localhost:5000/rooms
+
+##########
+# HEALTH
+############
+GET {{server}}/health
+
+###########
+# GET ALL ROOMS
+###########
+GET {{server}}
+
+###########
+# GET ROOM BY ID
+###########
+GET {{server}}/15
+
+###########
+# CREATE ROOM
+#############
+POST {{server}}/create
+Content-Type: application/json
+
+{
+    "url": "xyz.com"
+}
+
+
+#############
+# UPDATE ROOM
+############
+PUT {{server}}/update/15
+Content-Type: application/json
+
+{
+    "statusID": 2
+}
+
+#################
+# DELETE ROOM
+#################
+DELETE {{server}}/delete/13

@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "module": "ESNext",               // Compile to ES module format
+    "target": "ES2017",               // Set to ES6 or later (ES2015 is also okay)
+    "moduleResolution": "node",       // Use Node's module resolution
+    "esModuleInterop": true,          // Interoperability with CommonJS
+    "allowSyntheticDefaultImports": true, // Allow default imports from CommonJS
+    "strict": true                    // Optional, for stricter type checking
+  }
+}

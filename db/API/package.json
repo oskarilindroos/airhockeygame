@@ -1,0 +1,29 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "build": "npx tsc",
+    "start": "node server.js",
+    "dev": "concurrently \"tsc -w\"  \"nodemon --env-file=../.dev.env server.js\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.7.5",
+    "cors": "^2.8.5",
+    "express": "^4.21.1",
+    "mysql2": "^3.11.3",
+    "typescript": "^5.6.3"
+  },
+  "devDependencies": {
+    "@types/mysql2": "github:types/mysql2",
+    "concurrently": "^9.0.1",
+    "nodemon": "^3.1.7"
+  }
+}

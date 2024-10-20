@@ -1,0 +1,25 @@
+services:
+
+  db:
+    image: mysql
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - '3306:3306'
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - mysql_data:/var/lib/mysql
+
+  api:
+    build: ./API
+    image: api
+    ports:
+      - '${API_PORT}:${API_PORT}'
+    env_file:
+      - .env
+    restart: always
+
+
+volumes:
+  mysql_data:
