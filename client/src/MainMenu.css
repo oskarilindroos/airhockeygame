@@ -1,0 +1,59 @@
+/* src/MainMenu.css */
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%; /* Ensure full height */
+    width: 100%;
+    font-family: Arial, sans-serif;
+    background-color: #282c34; /* Dark background for contrast */
+    color: #ffffff; /* Light color for text */
+  }
+  
+  .main-menu {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center horizontally */
+    justify-content: center; /* Center vertically */
+    height: 100vh; /* Full viewport height */
+    text-align: center; /* Center text */
+    padding: 0 20px; /* Add some padding on sides for small screens */
+    box-sizing: border-box; /* Include padding in height calculations */
+  }
+  
+  .title {
+    font-size: 3rem;
+    margin-bottom: 2rem;
+    font-weight: bold; /* Make the title bold */
+  }
+  
+  .button-container {
+    display: flex;
+    flex-direction: column; /* Stack buttons vertically */
+    gap: 1rem; /* Space between buttons */
+  }
+  
+  .menu-button {
+    padding: 1rem 2rem; /* Button padding */
+    font-size: 1.5rem; /* Button font size */
+    color: white; /* Text color */
+    background-color: #3f51b5; /* Primary color */
+    border: none; /* Remove border */
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer; /* Change cursor on hover */
+    transition: background-color 0.3s, transform 0.2s; /* Smooth transitions */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  }
+  
+  .menu-button:hover {
+    background-color: #303f9f; /* Darker shade on hover */
+  }
+  
+  .menu-button:focus {
+    outline: none; /* Remove default focus outline */
+  }
+  
+  .menu-button:active {
+    transform: scale(0.95); /* Button press effect */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Shadow effect on press */
+  }
+  
