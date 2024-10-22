@@ -7,12 +7,12 @@ const wss = new WebSocketServer({ port: 8080 });
 const generateRandomPositionWithinCanvas = () => {
   const x = Math.floor(Math.random() * canvasSize.width);
   const y = Math.floor((Math.random() * canvasSize.height) / 2);
-  return {x, y };
+  return { x, y };
 };
 
 //Give data a label, so the reciever knows what kind of data it is
 const labelData = (label: String, data: any) => {
-  return {label, data};
+  return { label, data };
 }
 
 const puck = new Puck(canvasSize.width / 2, canvasSize.height / 2 + 50, 15, "black");
@@ -31,17 +31,31 @@ wss.on("connection", (ws) => {
   //Recieves a message from the client
   ws.on('message', (message) => {
     try {
-      // Convert the message from Buffer to string and parse it as JSON
+      //Convert the message from Buffer to string and parse it as JSON
       const data = JSON.parse(message.toString());
 
-      console.log('Received from client: ', data);
+      //Use data based on label
+      switch (data.label) {
+        case "player":
+          {
+            // Checks if player hits the puck
+            if (puck.playerCollisionCheck(data.data)) {
+              //Make sure no puck/player penetration happens
+              puck.playerPenetrationResponse(data.data);
+              //Add player velocity to puck
+              puck.playerCollisionResponse(data.data);
+            }
+            break;
+          }
 
-      // Checks if one player hits the puck
-      if (puck.playerCollisionCheck(data)) {
-        //Make sure no puck/player penetration happens
-        puck.playerPenetrationResponse(data);
-        //Add player velocity to puck
-        puck.playerCollisionResponse(data);
+        case "message":
+          {
+            console.log("Message from client:", data.data)
+            break;
+          }
+
+        default:
+          break;
       }
 
     } catch (err) {

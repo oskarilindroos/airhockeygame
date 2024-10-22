@@ -15,6 +15,11 @@ const ctx = canvas.getContext("2d")!;
 const socket = new WebSocket("ws://localhost:8080");
 let socketConnected: boolean = false; //Makes sure we don't try to send messages before the connection is made. Every sending should check this!!
 
+//Give data a label, so the reciever knows what kind of data it is
+const labelData = (label: String, data: any) => {
+  return {label, data};
+}
+
 socket.onopen = () => {
   console.log("Connected to the server");
   socketConnected = true;
@@ -23,6 +28,7 @@ socket.onopen = () => {
 socket.onmessage = (event) => {
   const data = JSON.parse(event.data);
 
+  //Use data based on label
   switch (data.label) {
     case "opponent":
       {
@@ -31,17 +37,17 @@ socket.onmessage = (event) => {
         break;
       }
 
-      case "puck":
-        {
-          break;
-        }
+    case "puck":
+      {
+        break;
+      }
 
-        case "message":
-          {
-            console.log("Message from server:", data.data)
-            break;
-          }
-  
+    case "message":
+      {
+        console.log("Message from server:", data.data)
+        break;
+      }
+
     default:
       break;
   }
@@ -116,7 +122,7 @@ const update = () => {
 
   //send playerdata to the server
   if (socketConnected) {
-    socket.send(JSON.stringify(player))
+    socket.send(JSON.stringify(labelData("player", player)))
   }
 
   // Draw the players at the new position<AAA<
