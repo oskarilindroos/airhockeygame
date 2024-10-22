@@ -6,6 +6,10 @@ export class Player extends GameObject {
   public xPrev: number = 0;
   public yPrev: number = 0;
 
+  /**
+   * Sets the location of the player
+   * @param data 
+   */
   setLocation(data: any){
     this.x = data.x;
     this.y = data.y;
