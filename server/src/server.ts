@@ -1,5 +1,6 @@
 import { WebSocketServer } from "ws";
 import { Puck } from "./Puck"
+import { Player } from "./Player"
 
 const canvasSize = { width: 300, height: 600 };
 const wss = new WebSocketServer({ port: 8080 });
@@ -16,6 +17,8 @@ const labelData = (label: String, data: any) => {
 }
 
 const puck = new Puck(canvasSize.width / 2, canvasSize.height / 2 + 50, 15, "black");
+const playerOne = new Player(canvasSize.width / 2, canvasSize.height - 40, 20, "green");
+const PlayerTwo = new Player(canvasSize.width / 2, 40, 20, "red");
 
 wss.on("connection", (ws) => {
   // Send a random position to the client every at around 60 times per second
@@ -38,12 +41,13 @@ wss.on("connection", (ws) => {
       switch (data.label) {
         case "player":
           {
+            playerOne.setLocation(data.data)
             // Checks if player hits the puck
-            if (puck.playerCollisionCheck(data.data)) {
+            if (puck.playerCollisionCheck(playerOne)) {
               //Make sure no puck/player penetration happens
-              puck.playerPenetrationResponse(data.data);
+              puck.playerPenetrationResponse(playerOne);
               //Add player velocity to puck
-              puck.playerCollisionResponse(data.data);
+              puck.playerCollisionResponse(playerOne);
             }
             break;
           }

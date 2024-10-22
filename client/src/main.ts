@@ -32,13 +32,15 @@ socket.onmessage = (event) => {
   switch (data.label) {
     case "opponent":
       {
-        opponent.x = data.data.x;
-        opponent.y = data.data.y;
+        //opponent.x = data.data.x;
+        //opponent.y = data.data.y;
         break;
       }
 
     case "puck":
       {
+        puck.x = data.data.x;
+        puck.y = data.data.y;
         break;
       }
 
