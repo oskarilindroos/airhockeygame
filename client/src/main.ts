@@ -13,16 +13,47 @@ const canvas = document.querySelector<HTMLCanvasElement>("#gameCanvas")!;
 const ctx = canvas.getContext("2d")!;
 
 const socket = new WebSocket("ws://localhost:8080");
+let socketConnected: boolean = false; //Makes sure we don't try to send messages before the connection is made. Every sending should check this!!
+
+//Give data a label, so the reciever knows what kind of data it is
+const labelData = (label: String, data: any) => {
+  return {label, data};
+}
 
 socket.onopen = () => {
   console.log("Connected to the server");
+  socket.send(JSON.stringify(labelData("radiusMatch", {player, opponent, puck})))
+  socketConnected = true;
 };
 
 socket.onmessage = (event) => {
   const data = JSON.parse(event.data);
-  opponent.x = data.x;
-  opponent.y = data.y;
-  //console.log("Message from server:", data);
+
+  //Use data based on label
+  switch (data.label) {
+    case "opponent":
+      {
+        //opponent.x = data.data.x;
+        //opponent.y = data.data.y;
+        break;
+      }
+
+    case "puck":
+      {
+        puck.x = data.data.x;
+        puck.y = data.data.y;
+        break;
+      }
+
+    case "message":
+      {
+        console.log("Message from server:", data.data)
+        break;
+      }
+
+    default:
+      break;
+  }
 };
 
 socket.onclose = () => {
@@ -76,12 +107,12 @@ const update = () => {
   drawCenterCircle(canvas, ctx);
 
   // Checks if one player hits the puck
-  if (puck.playerCollisionCheck(player)) {
-    //Make sure no puck/player penetration happens
-    puck.playerPenetrationResponse(player);
-    //Add player velocity to puck
-    puck.playerCollisionResponse(player);
-  }
+  //if (puck.playerCollisionCheck(player)) {
+  //  //Make sure no puck/player penetration happens
+  //  puck.playerPenetrationResponse(player);
+  //  //Add player velocity to puck
+  //  puck.playerCollisionResponse(player);
+  //}
 
   // Check if opponent hits the puck
   //if (puck.hitCheck(opponent)) {
@@ -90,7 +121,12 @@ const update = () => {
   //}
 
   //Calculate what position the puck should be in in the frame
-  puck.calcPosition(canvas.width, canvas.height);
+  //puck.calcPosition(canvas.width, canvas.height);
+
+  //send playerdata to the server
+  if (socketConnected) {
+    socket.send(JSON.stringify(labelData("player", player)));
+  }
 
   // Draw the players at the new position<AAA<
   player.draw(ctx);
