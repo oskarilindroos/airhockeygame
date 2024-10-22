@@ -18,8 +18,20 @@ wss.on("connection", (ws) => {
 
   //Recieves a message from the client
   ws.on('message', (message) => {
-    console.log('Received from client: ', message.toString());
-  });
+    try {
+        // Convert the message from Buffer to string and parse it as JSON
+        const data = JSON.parse(message.toString());
+        
+        // Check if it's an array
+        if (Array.isArray(data)) {
+            console.log('Received an array from client:', data);
+        } else {
+            console.log('Received from client: ', data);
+        }
+    } catch (err) {
+        console.log('Error parsing message:', err);
+    }
+});
 
 });
 

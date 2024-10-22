@@ -79,6 +79,9 @@ const update = () => {
 
   // Checks if one player hits the puck
   if (puck.playerCollisionCheck(player)) {
+    const array = [1, 2, 3, "hello", { key: "value" }];
+    socket.send(JSON.stringify(array));
+    socket.send("puckHit!")
     //Make sure no puck/player penetration happens
     puck.playerPenetrationResponse(player);
     //Add player velocity to puck
@@ -98,13 +101,6 @@ const update = () => {
   player.draw(ctx);
   opponent.draw(ctx);
   puck.draw(ctx);
-
-  if(socketConnected)
-  {
-    const message = 'Hello from client!';
-    socket.send(message);
-    console.log('Sent to server: ', message);
-  }
 
   requestAnimationFrame(update);
 };
