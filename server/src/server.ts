@@ -10,6 +10,7 @@ const generateRandomPositionWithinCanvas = () => {
   return {x, y };
 };
 
+//Give data a label, so the reciever knows what kind of data it is
 const labelData = (label: String, data: any) => {
   return {label, data};
 }
