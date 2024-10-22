@@ -11,8 +11,7 @@ export class Puck extends GameObject {
      * @param areaWidth 
      * @param areaHeight 
      */
-    calcPosition(areaWidth: number, areaHeight: number){
-        this.friction = 0.0;
+    calcPosition(areaWidth: number, areaHeight: number) {
         let hitWall: boolean = false;
 
         //Stops puck from going out of bounds left
@@ -56,7 +55,10 @@ export class Puck extends GameObject {
 
         //Add velocity
         this.x = this.x + this.velocity.x;
-        this.y = this.y + this.velocity.y;         
+        this.y = this.y + this.velocity.y;
+
+        //Remove friction (It's floating. Add air friction later?)
+        this.friction = 0.0;
     }
 
     /**
@@ -114,5 +116,10 @@ export class Puck extends GameObject {
 
         //Add puck velocity
         this.velocity = this.velocity.add(sepVelVec);
+
+        //Temporary fix for the "planet effect" TODO: make the standing still collision better somehow
+        if (player.velocity().x > 0.5 || player.velocity().y > 0.5) {
+            this.friction = 0.1;
+        }
     }
 }
