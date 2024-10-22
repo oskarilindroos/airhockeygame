@@ -17,4 +17,12 @@ export class GameObject {
         ctx.fill();
         ctx.closePath();
       }
+
+      /**
+       * Used for making the server have the same radiuses as the client
+       * @param data 
+       */
+      radiusMatch(data: any){
+        this.radius = data.radius;
+      }
 }

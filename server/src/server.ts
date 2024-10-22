@@ -18,7 +18,7 @@ const labelData = (label: String, data: any) => {
 
 const puck = new Puck(canvasSize.width / 2, canvasSize.height / 2 + 50, 15, "black");
 const playerOne = new Player(canvasSize.width / 2, canvasSize.height - 40, 20, "green");
-const PlayerTwo = new Player(canvasSize.width / 2, 40, 20, "red");
+const playerTwo = new Player(canvasSize.width / 2, 40, 20, "red");
 
 wss.on("connection", (ws) => {
   // Send a random position to the client every at around 60 times per second
@@ -41,6 +41,7 @@ wss.on("connection", (ws) => {
       switch (data.label) {
         case "player":
           {
+            //TODO make each player send an unique identifier, so the server knows which player hit the puck
             playerOne.setLocation(data.data)
             // Checks if player hits the puck
             if (puck.playerCollisionCheck(playerOne)) {
@@ -50,6 +51,13 @@ wss.on("connection", (ws) => {
               puck.playerCollisionResponse(playerOne);
             }
             break;
+          }
+
+        case "radiusMatch":
+          {
+            playerOne.radiusMatch(data.data.player);
+            playerTwo.radiusMatch(data.data.opponent);
+            puck.radiusMatch(data.data.puck);
           }
 
         case "message":

@@ -22,6 +22,7 @@ const labelData = (label: String, data: any) => {
 
 socket.onopen = () => {
   console.log("Connected to the server");
+  socket.send(JSON.stringify(labelData("radiusMatch", {player, opponent, puck})))
   socketConnected = true;
 };
 
@@ -124,7 +125,7 @@ const update = () => {
 
   //send playerdata to the server
   if (socketConnected) {
-    socket.send(JSON.stringify(labelData("player", player)))
+    socket.send(JSON.stringify(labelData("player", player)));
   }
 
   // Draw the players at the new position<AAA<
