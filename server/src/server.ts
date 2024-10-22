@@ -10,11 +10,19 @@ const generateRandomPositionWithinCanvas = () => {
 };
 
 wss.on("connection", (ws) => {
-  // Send a random position to the client every 100ms
+  // Send a random position to the client every at around 60 times per second
   setInterval(() => {
     const position = generateRandomPositionWithinCanvas();
     ws.send(JSON.stringify(position));
-  }, 100);
+  }, 16.6);
+
+  //Recieves a message from the client
+  ws.on('message', (message) => {
+    console.log('Received from client: ', message.toString());
+  });
+
 });
+
+
 
 console.log("WebSocket server started at ws://localhost:8080");

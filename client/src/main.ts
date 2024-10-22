@@ -13,9 +13,11 @@ const canvas = document.querySelector<HTMLCanvasElement>("#gameCanvas")!;
 const ctx = canvas.getContext("2d")!;
 
 const socket = new WebSocket("ws://localhost:8080");
+let socketConnected: boolean = false; //Makes sure we don't try to send messages before the connection is made. Every sending should check this!!
 
 socket.onopen = () => {
   console.log("Connected to the server");
+  socketConnected = true;
 };
 
 socket.onmessage = (event) => {
@@ -96,6 +98,13 @@ const update = () => {
   player.draw(ctx);
   opponent.draw(ctx);
   puck.draw(ctx);
+
+  if(socketConnected)
+  {
+    const message = 'Hello from client!';
+    socket.send(message);
+    console.log('Sent to server: ', message);
+  }
 
   requestAnimationFrame(update);
 };
