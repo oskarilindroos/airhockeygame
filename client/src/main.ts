@@ -72,7 +72,6 @@ createGameButton.addEventListener("click", createGameRoom);
 
 joinGameButton.addEventListener("click", () => {
   roomId = prompt("Enter the room ID") || "";
-  console.log(roomId);
 
   if (!roomId) {
     return;
