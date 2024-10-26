@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "dev": "node --watch -r ts-node/register src/server.ts",
+    "start": "node --env-file .env.development --env-file .env  dist/server.js",
+    "dev": "tsx --env-file .env.development --watch ./src/server.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -13,13 +14,20 @@
   "license": "ISC",
   "devDependencies": {
     "@types/express": "^5.0.0",
+    "@types/morgan": "^1.9.9",
     "@types/node": "^22.7.4",
+    "@types/uuid": "^10.0.0",
     "@types/ws": "^8.5.12",
     "ts-node": "^10.9.2",
+    "tsx": "^4.19.1",
     "typescript": "^5.6.2"
   },
   "dependencies": {
+    "@socket.io/admin-ui": "^0.5.1",
+    "cors": "^2.8.5",
     "express": "^4.21.0",
-    "ws": "^8.18.0"
+    "morgan": "^1.10.0",
+    "socket.io": "^4.8.0",
+    "uuid": "^10.0.0"
   }
 }

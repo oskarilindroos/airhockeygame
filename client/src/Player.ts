@@ -6,6 +6,8 @@ export class Player extends GameObject {
   public xPrev: number = 0;
   public yPrev: number = 0;
 
+  public id: string = "";
+
   handleMouseMove(
     event: MouseEvent,
     canvas: HTMLCanvasElement,
@@ -57,7 +59,7 @@ export class Player extends GameObject {
     );
   }
 
-  velocity(){
+  velocity() {
     return new Vector(this.x - this.xPrev, this.y - this.yPrev);
   }
 }
