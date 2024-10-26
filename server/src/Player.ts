@@ -5,7 +5,7 @@ export class Player extends GameObject {
   //x and y from previous frame. Used for calculating velocity
   public xPrev: number = 0;
   public yPrev: number = 0;
-
+  
   // Unique identifier for the player (socket id)
   public id: string = "";
 

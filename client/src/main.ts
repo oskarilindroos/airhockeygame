@@ -162,7 +162,6 @@ const update = () => {
   drawCenterLine(canvas, ctx);
   drawCenterCircle(canvas, ctx);
 
-  // Draw the players at the new position
   player.draw(ctx);
   opponent.draw(ctx);
   puck.draw(ctx);
