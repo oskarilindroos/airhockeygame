@@ -9,7 +9,7 @@ import { Puck } from "./Puck";
 import { Player } from "./Player";
 import { GameStates } from "./types/GameState";
 
-const CANVAS = { width: 300, height: 600 };
+const GAME_AREA = { width: 300, height: 600 };
 
 const gameStates: GameStates = {};
 
@@ -52,23 +52,23 @@ app.get("/healthcheck", (_req, res) => {
 io.on("connection", (socket) => {
   console.log("user connected");
 
-  // Handle room creation
+  // Handle creating a room
   socket.on("create room", () => {
     const roomId = uuidv4(); // Generate a unique room ID
 
     // Initialize the game state if it doesn't exist
     if (!gameStates[roomId]) {
       const puck = new Puck(
-        CANVAS.width / 2,
-        CANVAS.height / 2 + 50,
+        GAME_AREA.width / 2,
+        GAME_AREA.height / 2,
         15,
         "black",
       );
 
       // NOTE: Player 1 is always the one that created the room
       const playerOne = new Player(
-        CANVAS.width / 2,
-        CANVAS.height - 40,
+        GAME_AREA.width / 2,
+        GAME_AREA.height - 40,
         20,
         "green",
         socket.id,
@@ -102,7 +102,7 @@ io.on("connection", (socket) => {
     }
 
     // Add the joined player to the game state
-    const playerTwo = new Player(CANVAS.width / 2, 40, 20, "red", socket.id);
+    const playerTwo = new Player(GAME_AREA.width / 2, 40, 20, "red", socket.id);
     gameStates[roomId].players.push(playerTwo);
 
     // Join the room
@@ -115,36 +115,48 @@ io.on("connection", (socket) => {
     // Emit to the client that the room has been joined
     socket.emit("room joined", socket.id);
 
-    console.log("Game state:", gameStates[roomId]);
-
     // Start the game loop for the room
     const FPS = 60;
     setInterval(() => {
       const puck = gameStates[roomId].puck;
-      puck.calcPosition(CANVAS.width, CANVAS.height);
 
-      // Broadcast the updated game state to all clients in the room
+      // Puck collision detection
+      for (const player of gameStates[roomId].players) {
+        if (puck.playerCollisionCheck(player)) {
+          puck.playerPenetrationResponse(player);
+          puck.playerCollisionResponse(player);
+        }
+      }
+
+      // Update puck position
+      puck.calcPosition(GAME_AREA.width, GAME_AREA.height);
+
       io.to(roomId).emit("gameState updated", gameStates[roomId]);
     }, 1000 / FPS);
   });
 
   // Handle player movement
-  //socket.on("player move", (data) => {
-  //  const roomId = data.roomId;
-  //  const player = gameStates[roomId].players.find(
-  //    (player) => player.id === data.playerId,
-  //  );
-  //
-  //  if (!player) {
-  //    console.error("Player not found in game state");
-  //    return;
-  //  }
-  //
-  //  player.setLocation(data);
-  //
-  //  console.log("Game state:", gameStates[data.roomId]);
-  //});
+  socket.on("player move", (data) => {
+    const { roomId, playerId, location } = data;
 
+    if (!gameStates[roomId]) {
+      return;
+    }
+
+    // Find the player in the game state
+    const player = gameStates[roomId].players.find(
+      (player) => player.id === playerId,
+    );
+
+    if (!player) {
+      return;
+    }
+
+    // Update the player's location
+    player.setLocation(location);
+  });
+
+  // Handle disconnect
   socket.on("disconnect", () => {
     console.log("user disconnected");
   });
@@ -154,64 +166,3 @@ io.on("connection", (socket) => {
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
-//wss.on("connection", (ws) => {
-//  // Send a random position to the client every at around 60 times per second
-//  setInterval(() => {
-//    const position = generateRandomPositionWithinCanvas();
-//    ws.send(JSON.stringify(labelData("opponent", position)));
-//
-//    //Calculate what position the puck should be in in the frame
-//    puck.calcPosition(CANVAS.width, CANVAS.height);
-//    ws.send(JSON.stringify(labelData("puck", puck)));
-//  }, 16.6);
-//
-//  //Recieves a message from the client
-//  ws.on('message', (message) => {
-//    try {
-//      //Convert the message from Buffer to string and parse it as JSON
-//      const data = JSON.parse(message.toString());
-//
-//      //Use data based on label
-//      switch (data.label) {
-//        case "player":
-//          {
-//            //TODO make each player send an unique identifier, so the server knows which player hit the puck
-//            playerOne.setLocation(data.data)
-//            // Checks if player hits the puck
-//            if (puck.playerCollisionCheck(playerOne)) {
-//              //Make sure no puck/player penetration happens
-//              puck.playerPenetrationResponse(playerOne);
-//              //Add player velocity to puck
-//              puck.playerCollisionResponse(playerOne);
-//            }
-//            break;
-//          }
-//
-//        case "radiusMatch":
-//          {
-//            playerOne.radiusMatch(data.data.player);
-//            playerTwo.radiusMatch(data.data.opponent);
-//            puck.radiusMatch(data.data.puck);
-//          }
-//
-//        case "message":
-//          {
-//            console.log("Message from client:", data.data)
-//            break;
-//          }
-//
-//        default:
-//          break;
-//      }
-//
-//    } catch (err) {
-//      console.log('Error parsing message:', err);
-//    }
-//  });
-//
-//});
-//
-//
-//
-//console.log("WebSocket server started at ws://localhost:8080");

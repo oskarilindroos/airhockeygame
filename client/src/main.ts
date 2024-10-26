@@ -25,68 +25,21 @@ const socket = io(import.meta.env.VITE_API_URL);
 
 const ctx = canvas.getContext("2d")!;
 
-//const socket = new WebSocket("ws://localhost:8080");
-//let socketConnected: boolean = false; //Makes sure we don't try to send messages before the connection is made. Every sending should check this!!
+let roomId = "";
 
-//Give data a label, so the reciever knows what kind of data it is
-//const labelData = (label: String, data: any) => {
-//  return {label, data};
-//}
-
-//socket.onopen = () => {
-//  console.log("Connected to the server");
-//  socket.send(JSON.stringify(labelData("radiusMatch", {player, opponent, puck})))
-//  socketConnected = true;
-//};
-//
-//socket.onmessage = (event) => {
-//  const data = JSON.parse(event.data);
-//
-//  //Use data based on label
-//  switch (data.label) {
-//    case "opponent":
-//      {
-//        //opponent.x = data.data.x;
-//        //opponent.y = data.data.y;
-//        break;
-//      }
-//
-//    case "puck":
-//      {
-//        puck.x = data.data.x;
-//        puck.y = data.data.y;
-//        break;
-//      }
-//
-//    case "message":
-//      {
-//        console.log("Message from server:", data.data)
-//        break;
-//      }
-//
-//    default:
-//      break;
-//  }
-//};
-//
-//socket.onclose = () => {
-//  console.log("Disconnected from the server");
-//};
-//
-//socket.onerror = (error) => {
-//  console.error("Error:", error);
-//};
-
+// The initial game state
 const player = new Player(canvas.width / 2, canvas.height - 40, 20, "green");
 const opponent = new Player(canvas.width / 2, 40, 20, "red");
 const puck = new Puck(canvas.width / 2, canvas.height / 2, 15, "black");
 
-let roomId = "";
-let gameState: GameState = {};
+let gameState: GameState = {
+  puck: puck,
+  players: [player],
+};
 
 let isMouseDown = false;
 
-const startGame = (roomId: string) => {
+const startGame = () => {
   console.log("Starting game...");
   createGameButton.classList.add("hidden");
   joinGameButton.classList.add("hidden");
@@ -108,9 +61,10 @@ const createGameRoom = async () => {
   socket.emit("create room");
 
   // Listen for the room created event
-  socket.once("room created", (roomId) => {
+  socket.once("room created", (newRoomId) => {
     console.log(`Game room created with roomId: ${roomId}`);
-    startGame(roomId);
+    roomId = newRoomId;
+    startGame();
   });
 };
 
@@ -135,7 +89,7 @@ joinGameButton.addEventListener("click", () => {
   });
 
   socket.once("room joined", () => {
-    startGame(roomId);
+    startGame();
   });
 });
 
@@ -165,11 +119,38 @@ canvas.addEventListener("touchmove", (event) => {
 canvas.addEventListener("mousemove", (event) => {
   player.handleMouseMove(event, canvas, isMouseDown);
 
-  // Emit the player move event to the server
+  // Emit the player movement to the server
   socket.emit("player move", {
     roomId,
     playerId: socket.id,
-    location: { x: player.x, y: player.y },
+    location: {
+      x: player.x,
+      y: player.y,
+      xPrev: player.xPrev,
+      yPrev: player.yPrev,
+    },
+  });
+});
+
+// Listen for when a user joins the room
+socket.on("user joined", (userId) => {
+  console.log(`User (${userId}) joined the room`);
+});
+
+// Listen for game state updates from the server
+socket.on("gameState updated", (data) => {
+  gameState = data;
+
+  puck.x = gameState.puck.x;
+  puck.y = gameState.puck.y;
+
+  gameState.players.forEach((player) => {
+    if (player.id === socket.id) {
+      return;
+    }
+
+    opponent.x = player.x;
+    opponent.y = player.y;
   });
 });
 
@@ -182,34 +163,13 @@ const update = () => {
   drawCenterLine(canvas, ctx);
   drawCenterCircle(canvas, ctx);
 
-  // Draw the players at the new position<AAA<
+  // Draw the players at the new position
   player.draw(ctx);
   opponent.draw(ctx);
   puck.draw(ctx);
 
   requestAnimationFrame(update);
 };
-
-// Listen for when a user joins the room
-socket.on("user joined", (userId) => {
-  console.log(`User (${userId}) joined the room`);
-});
-
-// Listen for real-time game state updates
-socket.on("gameState updated", (gameState) => {
-  gameState = gameState;
-
-  puck.x = gameState.puck.x;
-  puck.y = gameState.puck.y;
-});
-
-// Listen for player move events
-//socket.on("player move", (data) => {
-//  // Mirror the opponent's position
-//  // TODO: Should be done server side
-//  opponent.x = canvas.width - data.x;
-//  opponent.y = canvas.height - data.y;
-//});
 
 // Start the game loop
 update();
