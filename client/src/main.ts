@@ -28,6 +28,7 @@ const socket = io(import.meta.env.VITE_API_URL);
 const ctx = canvas.getContext("2d")!;
 
 let roomId = "";
+let isPlayerOne = false;
 
 // The initial game state
 const player = new Player(canvas.width / 2, canvas.height - 40, 20, "green");
@@ -50,6 +51,11 @@ const startGame = () => {
   // Create the canvas
   canvas.classList.remove("hidden");
 
+  if (!isPlayerOne){
+    ctx.translate(canvas.width, canvas.height);
+    ctx.rotate(Math.PI);
+  }
+
   // Display the room ID
   roomIdElement.textContent = `Room ID: ${roomId}`;
 
@@ -59,6 +65,7 @@ const startGame = () => {
 
 const createGameRoom = async () => {
   console.log("Creating game room...");
+  isPlayerOne = true;
 
   // Create a new game room
   socket.emit("create room");
@@ -165,9 +172,9 @@ const update = () => {
   drawCenterLine(canvas, ctx);
   drawCenterCircle(canvas, ctx);
 
-  player.draw(ctx);
-  opponent.draw(ctx);
-  puck.draw(ctx);
+  for (const object of [player, opponent, puck]){
+    object.draw(ctx);
+  }
 
   requestAnimationFrame(update);
 };
