@@ -7,18 +7,20 @@ import { GameState } from "./types/GameState";
 
 // Create the canvas element
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
-<button id="createGame">Create Game</button>
-<button id="joinGame">Join Game</button>
-<p id="roomId"></p>
-<canvas class="hidden" width="300px" height="600px" id="gameCanvas">
-  <p>Your browser does not support the canvas element.</p>
-</canvas>
+    <h1 id="headerText">Welcome to AirHockey!</h1>
+    <button id="createGame" class="dynamic-button">Create Game</button>
+    <button id="joinGame" class="dynamic-button">Join Game</button>
+  <p id="roomId"></p>
+  <canvas class="hidden" width="300px" height="600px" id="gameCanvas">
+    <p>Your browser does not support the canvas element.</p>
+  </canvas>
 `;
 
 const canvas = document.querySelector<HTMLCanvasElement>("#gameCanvas")!;
 const createGameButton =
   document.querySelector<HTMLButtonElement>("#createGame")!;
 const joinGameButton = document.querySelector<HTMLButtonElement>("#joinGame")!;
+const headerText = document.querySelector<HTMLTextAreaElement>("#headerText")!;
 const roomIdElement = document.querySelector<HTMLDivElement>("#roomId")!;
 
 const socket = io(import.meta.env.VITE_API_URL);
@@ -43,6 +45,7 @@ const startGame = () => {
   console.log("Starting game...");
   createGameButton.classList.add("hidden");
   joinGameButton.classList.add("hidden");
+  headerText.classList.add("hidden");
 
   // Create the canvas
   canvas.classList.remove("hidden");

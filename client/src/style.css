@@ -22,18 +22,36 @@ body {
   margin: 0;
 }
 
-button {
-  font-size: 1rem;
-  width: 150px;
-  padding: 0.5rem 1rem;
-  border: 0.15rem solid black;
-  border-radius: 0.5rem;
-  background-color: white;
-  cursor: pointer;
+.button-container {
+  display: flex;
+  flex-direction: column; /* Stack buttons vertically */
+  gap: 1rem; /* Space between buttons */
 }
 
+.dynamic-button {
+  padding: 1rem 2rem;
+  font-size: 1.5rem;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#createGame {
+  background-color: #3f51b5; /* Primary color for Create Game button */
+}
+
+#joinGame {
+  background-color: #ff5722; /* Different color for Join Game button */
+}
+
+h1 {
+  font-family: 'Open Sans', sans-serif;
+}
 button:hover {
-  background-color: lightgray;
+  background-color: #303f9f; /* Darker shade on hover */
 }
 
 .hidden {
