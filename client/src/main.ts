@@ -170,9 +170,10 @@ const update = () => {
 
   player.draw(ctx);
 
+  ctx.save();
+
   // Flip the image when drawing from player 2's perspective
   if (!isPlayerOne){
-    ctx.save();
     ctx.translate(canvas.width, canvas.height);
     ctx.rotate(Math.PI);
   }
@@ -180,10 +181,7 @@ const update = () => {
   puck.draw(ctx);
   opponent.draw(ctx);
 
-  if (!isPlayerOne){
-    ctx.restore();
-  }
-
+  ctx.restore();
 
   requestAnimationFrame(update);
 };
