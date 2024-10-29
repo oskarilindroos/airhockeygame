@@ -51,10 +51,6 @@ const startGame = () => {
   // Create the canvas
   canvas.classList.remove("hidden");
 
-  if (!isPlayerOne){
-    ctx.translate(canvas.width, canvas.height);
-    ctx.rotate(Math.PI);
-  }
 
   // Display the room ID
   roomIdElement.textContent = `Room ID: ${roomId}`;
@@ -133,10 +129,10 @@ canvas.addEventListener("mousemove", (event) => {
     roomId,
     playerId: socket.id,
     location: {
-      x: player.x,
-      y: player.y,
-      xPrev: player.xPrev,
-      yPrev: player.yPrev,
+      x: isPlayerOne? player.x : canvas.width - player.x,
+      y: isPlayerOne? player.y : canvas.height - player.y,
+      xPrev: isPlayerOne? player.xPrev : canvas.width - player.xPrev,
+      yPrev: isPlayerOne? player.yPrev: canvas.height - player.yPrev,
     },
   });
 });
@@ -172,9 +168,22 @@ const update = () => {
   drawCenterLine(canvas, ctx);
   drawCenterCircle(canvas, ctx);
 
-  for (const object of [player, opponent, puck]){
-    object.draw(ctx);
+  player.draw(ctx);
+
+  // Flip the image when drawing from player 2's perspective
+  if (!isPlayerOne){
+    ctx.save();
+    ctx.translate(canvas.width, canvas.height);
+    ctx.rotate(Math.PI);
   }
+
+  puck.draw(ctx);
+  opponent.draw(ctx);
+
+  if (!isPlayerOne){
+    ctx.restore();
+  }
+
 
   requestAnimationFrame(update);
 };
