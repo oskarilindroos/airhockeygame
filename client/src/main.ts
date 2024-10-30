@@ -28,6 +28,7 @@ const socket = io(import.meta.env.VITE_API_URL);
 const ctx = canvas.getContext("2d")!;
 
 let roomId = "";
+let isPlayerOne = false;
 
 // The initial game state
 const player = new Player(canvas.width / 2, canvas.height - 40, 20, "green");
@@ -50,6 +51,7 @@ const startGame = () => {
   // Create the canvas
   canvas.classList.remove("hidden");
 
+
   // Display the room ID
   roomIdElement.textContent = `Room ID: ${roomId}`;
 
@@ -59,6 +61,7 @@ const startGame = () => {
 
 const createGameRoom = async () => {
   console.log("Creating game room...");
+  isPlayerOne = true;
 
   // Create a new game room
   socket.emit("create room");
@@ -126,10 +129,10 @@ canvas.addEventListener("mousemove", (event) => {
     roomId,
     playerId: socket.id,
     location: {
-      x: player.x,
-      y: player.y,
-      xPrev: player.xPrev,
-      yPrev: player.yPrev,
+      x: isPlayerOne? player.x : canvas.width - player.x,
+      y: isPlayerOne? player.y : canvas.height - player.y,
+      xPrev: isPlayerOne? player.xPrev : canvas.width - player.xPrev,
+      yPrev: isPlayerOne? player.yPrev: canvas.height - player.yPrev,
     },
   });
 });
@@ -166,8 +169,19 @@ const update = () => {
   drawCenterCircle(canvas, ctx);
 
   player.draw(ctx);
-  opponent.draw(ctx);
+
+  ctx.save();
+
+  // Flip the image when drawing from player 2's perspective
+  if (!isPlayerOne){
+    ctx.translate(canvas.width, canvas.height);
+    ctx.rotate(Math.PI);
+  }
+
   puck.draw(ctx);
+  opponent.draw(ctx);
+
+  ctx.restore();
 
   requestAnimationFrame(update);
 };
