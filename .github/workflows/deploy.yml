@@ -69,6 +69,16 @@ jobs:
 
       - name: Create env file
         run: |
-          touch .env
-          echo "${{ secrets.SERVER_ENV_PROD }}" > .env
+          echo "testenvvariable" > .env
           cat .env
+          
+      - name: SSH
+        uses: appleboy/ssh-action@v1.1.0
+        with:
+          host: ${{ secrets.SERVER_ADDRESS }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: 22
+          script: |
+              whoami
+              ll
