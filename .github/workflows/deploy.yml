@@ -78,7 +78,7 @@ jobs:
           port: 22
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "./compose.yml"
-          target: "~/.deploy/${{ github.event.repository.name }}/"
+          target: "~/deploy/${{ github.event.repository.name }}/"
 
       - name: Pull the latest docker images and start the compose services
         uses: appleboy/ssh-action@v1.1.0
@@ -88,5 +88,5 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            cd ~/.deploy/${{ github.event.repository.name }}
+            cd ~/deploy/${{ github.event.repository.name }}
             echo "file create test" > test.txt
