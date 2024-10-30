@@ -46,7 +46,7 @@ jobs:
   #         username: ${{ github.actor }}
   #         password: ${{ secrets.GITHUB_TOKEN }}
   #
-  #     - name: Build the client image
+  #     - name: Build and push the client image
   #       uses: docker/build-push-action@v5.0.0
   #       with:
   #         context: ./client
@@ -54,7 +54,7 @@ jobs:
   #         push: true
   #         tags: "${{ env.REGISTRY }}/${{ env.SERVER_IMAGE_NAME }}"
   #
-  #     - name: Build the server image
+  #     - name: Build and push the server image
   #       uses: docker/build-push-action@v5.0.0
   #       with:
   #         context: ./server
@@ -70,12 +70,17 @@ jobs:
       - name: Fetch Code
         uses: actions/checkout@v4.1.1
 
-      # - name: Create env file
-      #   run: |
-      #     echo "testenvvariable" > .env
-      #     cat .env
+      - name: Copy compose.yml to target server via SCP
+        uses: appleboy/scp-action@v0.1.3
+        with:
+          host: ${{ secrets.SERVER_ADDRESS }}
+          username: ${{ secrets.SSH_USER }}
+          port: 22
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "./compose.yml"
+          target: "~/.deploy/${{ github.event.repository.name }}/"
 
-      - name: SSH
+      - name: Pull the latest docker images and start the compose services
         uses: appleboy/ssh-action@v1.1.0
         with:
           host: ${{ secrets.SERVER_ADDRESS }}
@@ -83,4 +88,5 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            whoami
+            cd ~/.deploy/${{ github.event.repository.name }}
+            echo "file create test" > test.txt
