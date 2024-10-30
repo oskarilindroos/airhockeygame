@@ -22,6 +22,7 @@ if (process.env.CORS_ORIGINS === undefined) {
 }
 
 const allowedOrigins = process.env.CORS_ORIGINS.split(",");
+console.log("Allowed origins:", allowedOrigins);
 
 const app = express();
 const server = createServer(app);
@@ -166,3 +167,4 @@ io.on("connection", (socket) => {
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
