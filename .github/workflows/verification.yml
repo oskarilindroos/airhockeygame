@@ -1,0 +1,59 @@
+name: Branch Verification
+
+on:
+  pull_request:
+    branches:
+      - "main"
+
+env:
+  REGISTRY: ghcr.io
+  CLIENT_IMAGE_NAME: ${{ github.repository }}/client
+  SERVER_IMAGE_NAME: ${{ github.repository }}/server
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    timeout-minutes: 5
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Set up QEmu
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Docker login
+        uses: docker/login-action@v3.0.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build the client image
+        uses: docker/build-push-action@v5.0.0
+        with:
+          context: ./client
+          file: ./client/Dockerfile
+          push: false
+          tags: "${{ env.REGISTRY }}/${{ env.SERVER_IMAGE_NAME }}"
+
+      - name: Build the server image
+        uses: docker/build-push-action@v5.0.0
+        with:
+          context: ./server
+          file: ./server/Dockerfile
+          push: false
+          tags: "${{ env.REGISTRY }}/${{ env.CLIENT_IMAGE_NAME }}"
