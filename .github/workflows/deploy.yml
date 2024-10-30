@@ -1,4 +1,4 @@
-name: Branch Verification
+name: Deploy to Oracle Cloud VPS
 
 on:
   push:
