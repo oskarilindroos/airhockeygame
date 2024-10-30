@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - "main"
+  pull_request:
+    branches:
+      - "main"
 
 env:
   REGISTRY: ghcr.io
@@ -71,7 +74,7 @@ jobs:
         run: |
           echo "testenvvariable" > .env
           cat .env
-          
+
       - name: SSH
         uses: appleboy/ssh-action@v1.1.0
         with:
@@ -80,5 +83,5 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           port: 22
           script: |
-              whoami
-              ll
+            whoami
+            ll
