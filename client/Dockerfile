@@ -1,4 +1,4 @@
-FROM node:20-alpine as build
+FROM node:20-alpine AS build
 
 # Define build arguments for environment variables
 ARG VITE_API_URL
