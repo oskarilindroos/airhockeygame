@@ -24,6 +24,7 @@ const headerText = document.querySelector<HTMLTextAreaElement>("#headerText")!;
 const roomIdElement = document.querySelector<HTMLDivElement>("#roomId")!;
 
 const socket = io(import.meta.env.VITE_API_URL);
+console.log("API URL:", import.meta.env.VITE_API_URL);
 
 const ctx = canvas.getContext("2d")!;
 
@@ -50,7 +51,6 @@ const startGame = () => {
 
   // Create the canvas
   canvas.classList.remove("hidden");
-
 
   // Display the room ID
   roomIdElement.textContent = `Room ID: ${roomId}`;
@@ -129,10 +129,10 @@ canvas.addEventListener("mousemove", (event) => {
     roomId,
     playerId: socket.id,
     location: {
-      x: isPlayerOne? player.x : canvas.width - player.x,
-      y: isPlayerOne? player.y : canvas.height - player.y,
-      xPrev: isPlayerOne? player.xPrev : canvas.width - player.xPrev,
-      yPrev: isPlayerOne? player.yPrev: canvas.height - player.yPrev,
+      x: isPlayerOne ? player.x : canvas.width - player.x,
+      y: isPlayerOne ? player.y : canvas.height - player.y,
+      xPrev: isPlayerOne ? player.xPrev : canvas.width - player.xPrev,
+      yPrev: isPlayerOne ? player.yPrev : canvas.height - player.yPrev,
     },
   });
 });
@@ -173,7 +173,7 @@ const update = () => {
   ctx.save();
 
   // Flip the image when drawing from player 2's perspective
-  if (!isPlayerOne){
+  if (!isPlayerOne) {
     ctx.translate(canvas.width, canvas.height);
     ctx.rotate(Math.PI);
   }
