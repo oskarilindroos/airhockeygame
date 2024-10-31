@@ -24,7 +24,6 @@ const headerText = document.querySelector<HTMLTextAreaElement>("#headerText")!;
 const roomIdElement = document.querySelector<HTMLDivElement>("#roomId")!;
 
 const socket = io(import.meta.env.VITE_API_URL);
-console.log("API URL:", import.meta.env.VITE_API_URL);
 
 const ctx = canvas.getContext("2d")!;
 
