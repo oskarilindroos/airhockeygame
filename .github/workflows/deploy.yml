@@ -34,10 +34,6 @@ jobs:
       - name: Create server .env file
         run: echo "${{ secrets.SERVER_ENV_PROD }}" > ./server/.env
 
-      - name: Create docker .env file
-        # Uses the same .env file as client
-        run: echo "${{ secrets.CLIENT_ENV_PROD }}" > ./.env
-
       - name: Set up QEmu
         uses: docker/setup-qemu-action@v3
 
