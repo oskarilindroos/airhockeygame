@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - "main"
+    paths-ignore:
+      - "**.md" # Don't redeploy if the changes are only in markdown files (README.md, etc.)
 
 env:
   REGISTRY: ghcr.io
