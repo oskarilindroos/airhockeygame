@@ -1,16 +1,17 @@
 services:
   client:
-    restart: always
+    restart: unless-stopped
     image: ghcr.io/oskarilindroos/airhockeygame/client
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - ./certbot/conf:/etc/letsencrypt
       - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
 
   server:
-    restart: always
+    restart: unless-stopped
     image: ghcr.io/oskarilindroos/airhockeygame/server
     ports:
       - "5000:5000"
@@ -20,4 +21,4 @@ services:
     volumes:
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do sleep 1000; done'"
+    command: certonly --webroot --webroot-path=/var/www/certbot --force-renewal -d airhockey.live --agree-tos
