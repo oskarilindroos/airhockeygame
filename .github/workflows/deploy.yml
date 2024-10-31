@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - "main"
-  pull_request:
-    branches:
-      - "main"
 
 env:
   REGISTRY: ghcr.io
@@ -15,17 +12,15 @@ env:
 
 jobs:
   build:
-    name: Build and push docker images
+    name: Build and push docker images to ghcr
     runs-on: ubuntu-latest
-
     timeout-minutes: 5
-
     permissions:
       contents: read
       packages: write
 
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Create client .env file
