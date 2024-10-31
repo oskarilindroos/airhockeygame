@@ -73,7 +73,7 @@ jobs:
       - name: Fetch Code
         uses: actions/checkout@v4.1.1
 
-      - name: Copy compose.yml and .env to target server via SCP
+      - name: Copy compose.yml to target server via SCP
         uses: appleboy/scp-action@v0.1.3
         with:
           host: ${{ secrets.SERVER_ADDRESS }}
