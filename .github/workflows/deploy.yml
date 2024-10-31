@@ -52,6 +52,8 @@ jobs:
         with:
           context: ./client
           file: ./client/Dockerfile
+          build-args: |
+            VITE_API_URL=${{ secrets.VITE_API_URL }}
           push: true
           tags: "${{ env.REGISTRY }}/${{ env.CLIENT_IMAGE_NAME }}"
 
@@ -71,9 +73,6 @@ jobs:
       - name: Fetch Code
         uses: actions/checkout@v4.1.1
 
-      - name: Create .env file
-        run: echo "${{ secrets.CLIENT_ENV_PROD }}" > ./.env
-
       - name: Copy compose.yml and .env to target server via SCP
         uses: appleboy/scp-action@v0.1.3
         with:
@@ -81,7 +80,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
-          source: "./compose.yml, ./.env"
+          source: "./compose.yml"
           target: "~/deploy/${{ github.event.repository.name }}/"
 
       - name: Pull the latest docker images and start the compose services via SSH
