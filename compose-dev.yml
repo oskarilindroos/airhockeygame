@@ -6,7 +6,7 @@ services:
       args:
         - VITE_API_URL=http:/localhost:5000
     ports:
-      - "80:80"
+      - "3000:3000"
   server:
     build:
       context: ./server

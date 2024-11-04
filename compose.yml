@@ -1,24 +1,36 @@
 services:
   client:
+    container_name: airhockeygame-client
     restart: unless-stopped
     image: ghcr.io/oskarilindroos/airhockeygame/client
+    networks:
+      - app-network
     ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-      - ./certbot/conf:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
+      - "3000:3000"
 
   server:
+    container_name: airhockeygame-server
     restart: unless-stopped
     image: ghcr.io/oskarilindroos/airhockeygame/server
+    networks:
+      - app-network
     ports:
       - "5000:5000"
 
-  certbot:
-    image: certbot/certbot
+  proxy-manager:
+    container_name: nginx-proxy-manager
+    restart: unless-stopped
+    image: "jc21/nginx-proxy-manager"
+    ports:
+      - "80:80" # Public HTTP Port
+      - "443:443" # Public HTTPS Port
+      - "81:81" # Admin Web Port
+    networks:
+      - app-network
     volumes:
-      - ./certbot/conf:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
-    command: certonly --webroot --webroot-path=/var/www/certbot --force-renewal -d airhockey.live --agree-tos
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
+
+networks:
+  app-network:
+    driver: bridge
