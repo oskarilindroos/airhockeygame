@@ -22,5 +22,8 @@ FROM nginx:alpine
 # Copy the built Vite app to Nginx's web server directory
 COPY --from=build /app/dist /usr/share/nginx/html
 
+# Copy nginx config (needed to run the app on a different port than 80)
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
 # Start Nginx when the container runs
 CMD ["nginx", "-g", "daemon off;"]
