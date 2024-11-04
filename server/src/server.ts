@@ -73,6 +73,7 @@ io.on("connection", (socket) => {
         20,
         "green",
         socket.id,
+        0,
       );
 
       gameStates[roomId] = {
@@ -103,7 +104,7 @@ io.on("connection", (socket) => {
     }
 
     // Add the joined player to the game state
-    const playerTwo = new Player(GAME_AREA.width / 2, 40, 20, "red", socket.id);
+    const playerTwo = new Player(GAME_AREA.width / 2, 40, 20, "red", socket.id, 0);
     gameStates[roomId].players.push(playerTwo);
 
     // Join the room
@@ -118,7 +119,7 @@ io.on("connection", (socket) => {
 
     // Start the game loop for the room
     const FPS = 60;
-    setInterval(() => {
+    const intervalId = setInterval(() => {
       const puck = gameStates[roomId].puck;
 
       // Puck collision detection
@@ -129,8 +130,15 @@ io.on("connection", (socket) => {
         }
       }
 
+      // Check if socre limit is hit
+      if (gameStates[roomId].players[0].score === 5 || gameStates[roomId].players[1].score === 5) {
+        io.to(roomId).emit("game over", gameStates[roomId]);
+        clearInterval(intervalId);
+        return;
+      }
+
       // Update puck position
-      puck.calcPosition(GAME_AREA.width, GAME_AREA.height);
+      puck.calcPosition(GAME_AREA.width, GAME_AREA.height, gameStates[roomId].players[0], gameStates[roomId].players[1]);
 
       io.to(roomId).emit("gameState updated", gameStates[roomId]);
     }, 1000 / FPS);

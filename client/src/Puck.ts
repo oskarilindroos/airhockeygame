@@ -6,10 +6,11 @@ export class Puck extends GameObject {
     public velocity: Vector = new Vector(0, 0);
     public friction: number = 0.0;
 
+
     /**
      * Calculates the location of the puck in the current frame based on velocity
-     * @param areaWidth 
-     * @param areaHeight 
+     * @param areaWidth
+     * @param areaHeight
      */
     calcPosition(areaWidth: number, areaHeight: number){
         this.friction = 0.0;
@@ -29,13 +30,23 @@ export class Puck extends GameObject {
             hitWall = true; //Add a bit of friction
         }
 
+        if (this.y - this.radius <= 0) {
+            if (this.x - this.radius > areaWidth / 2 - 50 && this.x + this.radius < areaWidth / 2 + 50) {
+              console.log("Goal!");
+            } else {
+              this.y = 1 + this.radius;
+              this.velocity.y = -this.velocity.y;
+              hitWall = true; //Add a bit of friction
+            }
+          }
+        /*
         //Stops puck from going out of bounds top
         if ((this.y - this.radius) <= 0) {
             this.y = 1 + this.radius;
             this.velocity.y = -this.velocity.y;
             hitWall = true; //Add a bit of friction
         }
-
+        */
         //Stops puck from going out of bounds bottom
         if ((this.y + this.radius) >= areaHeight) {
             this.y = areaHeight - 1 - this.radius;
@@ -56,12 +67,12 @@ export class Puck extends GameObject {
 
         //Add velocity
         this.x = this.x + this.velocity.x;
-        this.y = this.y + this.velocity.y;         
+        this.y = this.y + this.velocity.y;
     }
 
     /**
-     * Checks if a player hits the puck 
-     * @param player 
+     * Checks if a player hits the puck
+     * @param player
      * @returns true or false.
      */
     playerCollisionCheck(player: Player) {
@@ -75,7 +86,7 @@ export class Puck extends GameObject {
 
     /**
      * Stops the puck from entering inside the player
-     * @param player 
+     * @param player
      */
     playerPenetrationResponse(player: Player) {
         //Setup vectors
@@ -98,7 +109,7 @@ export class Puck extends GameObject {
 
     /**
      * Transfer's the players vector to the puck in a realistic manner
-     * @param player 
+     * @param player
      */
     playerCollisionResponse(player: Player) {
         //Setup vectors

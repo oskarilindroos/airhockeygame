@@ -11,7 +11,7 @@ export class Puck extends GameObject {
    * @param areaWidth
    * @param areaHeight
    */
-  calcPosition(areaWidth: number, areaHeight: number) {
+  calcPosition(areaWidth: number, areaHeight: number, player1: Player, player2: Player) {
     let hitWall: boolean = false;
 
     //Stops puck from going out of bounds left
@@ -28,18 +28,46 @@ export class Puck extends GameObject {
       hitWall = true; //Add a bit of friction
     }
 
+    if (this.y - this.radius <= 0) {
+      if (this.x - this.radius > areaWidth / 2 - 50 && this.x + this.radius < areaWidth / 2 + 50) {
+        // Player 1 scores
+        player1.increaseScore();
+        // Reset puck position
+        this.velocity.y = 0;
+        this.velocity.x = 0;
+        this.x = areaWidth / 2;
+        this.y = areaHeight / 2 - 50;
+      } else {
+        this.y = 1 + this.radius;
+        this.velocity.y = -this.velocity.y;
+        hitWall = true; //Add a bit of friction
+      }
+    }
+
+    /*
     //Stops puck from going out of bounds top
     if (this.y - this.radius <= 0) {
       this.y = 1 + this.radius;
       this.velocity.y = -this.velocity.y;
       hitWall = true; //Add a bit of friction
     }
+    */
 
     //Stops puck from going out of bounds bottom
     if (this.y + this.radius >= areaHeight) {
-      this.y = areaHeight - 1 - this.radius;
-      this.velocity.y = -this.velocity.y;
-      hitWall = true; //Add a bit of friction
+      if (this.x - this.radius > areaWidth / 2 - 50 && this.x + this.radius < areaWidth / 2 + 50) {
+        // Player 2 scores
+        player2.increaseScore();
+        // Reset puck position
+        this.velocity.y = 0;
+        this.velocity.x = 0;
+        this.x = areaWidth / 2;
+        this.y = areaHeight / 2 + 50;
+      } else {
+        this.y = areaHeight - 1 - this.radius;
+        this.velocity.y = -this.velocity.y;
+        hitWall = true; //Add a bit of friction
+      }
     }
 
     //reduce puck velocity with friction

@@ -8,6 +8,8 @@ export class Player extends GameObject {
 
   public id: string = "";
 
+  public score: number = 0;
+
   handleMouseMove(
     event: MouseEvent,
     canvas: HTMLCanvasElement,
@@ -32,10 +34,11 @@ export class Player extends GameObject {
       Math.max(this.radius, mouseX),
       canvas.width - this.radius,
     );
-    this.y = Math.min(
+    this.y = mouseY;
+    /*this.y = Math.min(
       Math.max(canvas.height / 2 + this.radius, mouseY),
       canvas.height - this.radius,
-    );
+    );*/
   }
 
   handleTouchMove(

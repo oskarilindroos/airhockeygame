@@ -11,17 +11,18 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
     <button id="createGame" class="dynamic-button">Create Game</button>
     <button id="joinGame" class="dynamic-button">Join Game</button>
   <p id="roomId"></p>
+  <h4 id="scoreline"></h4>
   <canvas class="hidden" width="300px" height="600px" id="gameCanvas">
     <p>Your browser does not support the canvas element.</p>
   </canvas>
 `;
 
 const canvas = document.querySelector<HTMLCanvasElement>("#gameCanvas")!;
-const createGameButton =
-  document.querySelector<HTMLButtonElement>("#createGame")!;
+const createGameButton = document.querySelector<HTMLButtonElement>("#createGame")!;
 const joinGameButton = document.querySelector<HTMLButtonElement>("#joinGame")!;
 const headerText = document.querySelector<HTMLTextAreaElement>("#headerText")!;
 const roomIdElement = document.querySelector<HTMLDivElement>("#roomId")!;
+const scorelineElement = document.querySelector<HTMLDivElement>("#scoreline")!;
 
 const socket = io(import.meta.env.VITE_API_URL);
 
@@ -34,6 +35,7 @@ let isPlayerOne = false;
 const player = new Player(canvas.width / 2, canvas.height - 40, 20, "green");
 const opponent = new Player(canvas.width / 2, 40, 20, "red");
 const puck = new Puck(canvas.width / 2, canvas.height / 2, 15, "black");
+let gameOver: boolean = false;
 
 let gameState: GameState = {
   puck: puck,
@@ -145,6 +147,9 @@ socket.on("user joined", (userId) => {
 socket.on("gameState updated", (data) => {
   gameState = data;
 
+  // Update the scoreline
+  scorelineElement.textContent = `Player 1: ${gameState.players[0].score} | Player 2: ${gameState.players[1].score}`;
+
   puck.x = gameState.puck.x;
   puck.y = gameState.puck.y;
 
@@ -156,6 +161,13 @@ socket.on("gameState updated", (data) => {
     opponent.x = player.x;
     opponent.y = player.y;
   });
+});
+
+// Listen for game over event
+socket.on("game over", (data) => {
+  gameOver = true;
+  alert(`Game over! Player ${data.players[0].score === 5 ? 1 : 2} wins!`);
+  window.location.reload();
 });
 
 // Main game loop
@@ -186,4 +198,6 @@ const update = () => {
 };
 
 // Start the game loop
-update();
+if (!gameOver) {
+  update();
+}
