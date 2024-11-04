@@ -1,19 +1,26 @@
 services:
   client:
+    container_name: airhockeygame-client
     restart: unless-stopped
     image: ghcr.io/oskarilindroos/airhockeygame/client
+    networks:
+      - app-network
     ports:
       - "3000:3000"
 
   server:
+    container_name: airhockeygame-server
     restart: unless-stopped
     image: ghcr.io/oskarilindroos/airhockeygame/server
+    networks:
+      - app-network
     ports:
       - "5000:5000"
 
   proxy-manager:
+    container_name: nginx-proxy-manager
     restart: unless-stopped
-    image: "jc21/nginx-proxy-manager:latest"
+    image: "jc21/nginx-proxy-manager"
     ports:
       - "80:80" # Public HTTP Port
       - "443:443" # Public HTTPS Port
