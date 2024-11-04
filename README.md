@@ -4,15 +4,13 @@
 
 ## Contributors
 
-- [Oskari Lindroos](https://github.com/oskarilindroos)
-- [Juuso Finne](https://github.com/juuso-finne)
-- [Vertti Keski-Säntti](https://github.com/VerttiKS)
-- [Janne Salovaara](https://github.com/Jondels21)
-- [Eero Savukoski](https://github.com/Erskari)
+<a href="https://github.com/oskarilindroos/airhockeygame/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=oskarilindroos/airhockeygame" />
+</a>
 
 ## Project information
 
-This project is a multiplayer 1v1 air hockey browser game. The online component is implemented using websockets.
+This project is a multiplayer 1v1 air hockey browser game built with TypeScript. The online component is implemented using websockets (socket.io).
 
 ### Technologies
 
@@ -31,6 +29,14 @@ This project is a multiplayer 1v1 air hockey browser game. The online component 
 - Socket.io
 - MySQL
 
+## Deployment
+
+The project is deployed on Oracle Cloud on a VPS running Ubuntu. The server hosts three services:
+
+- **Client**: The game client is accessible at [www.airhockey.live](https://www.airhockey.live)
+- **Server**: The game API is available at [api.airhockey.live](https://api.airhockey.live/healthcheck)
+- **Nginx Proxy Manager**: Used for reverse proxy and SSL certificate management, accessible at [nginx.airhockey.live](https://nginx.airhockey.live)
+
 ## Development instructions
 
 1. Clone the repository
@@ -43,8 +49,5 @@ This project is a multiplayer 1v1 air hockey browser game. The online component 
 
 ## Build instructions
 
-TBD
-
-### Deployment
-
-TBD
+1. Run `npm run build` in the client directory to build the client
+2. Run `npm run build` in the server directory to build the server
