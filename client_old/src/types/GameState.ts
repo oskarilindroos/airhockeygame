@@ -1,5 +1,5 @@
-import { Player } from "../classes/Player";
-import { Puck } from "../classes//Puck";
+import { Player } from "../Player";
+import { Puck } from "../Puck";
 
 export interface GameState {
   players: Player[];
