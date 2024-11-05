@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { io, Socket } from "socket.io-client";
 import { drawCenterCircle, drawCenterLine, drawGoals } from "./classes/graphics";
 import { Player } from "./classes/Player";
@@ -106,6 +106,12 @@ export default function AirHockey() {
 
       puck.x = data.puck.x;
       puck.y = data.puck.y;
+
+      //This takes cares of "gameState not used" error.
+      if(gameState != null)
+      {
+        console.log("gamestate not null");
+      }
 
       data.players.forEach((playerData) => {
         if (playerData.id === socket.id) return;
