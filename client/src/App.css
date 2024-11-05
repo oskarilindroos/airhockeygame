@@ -1,4 +1,4 @@
-body {
+.bodyReact {
   margin: 0;
   display: flex;
   place-items: center;
@@ -6,7 +6,7 @@ body {
   min-height: 100vh;
 }
 
-#app {
+.app {
   display: flex;
   flex-direction: column;
   align-items: center;
