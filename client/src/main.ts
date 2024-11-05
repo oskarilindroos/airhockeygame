@@ -11,6 +11,7 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
     <button id="createGame" class="dynamic-button">Create Game</button>
     <button id="joinGame" class="dynamic-button">Join Game</button>
   <p id="roomId"></p>
+  <h2 class="hidden" id="gameTimer">5:00</h2>
   <canvas class="hidden" width="300px" height="600px" id="gameCanvas">
     <p>Your browser does not support the canvas element.</p>
   </canvas>
@@ -22,6 +23,7 @@ const createGameButton =
 const joinGameButton = document.querySelector<HTMLButtonElement>("#joinGame")!;
 const headerText = document.querySelector<HTMLTextAreaElement>("#headerText")!;
 const roomIdElement = document.querySelector<HTMLDivElement>("#roomId")!;
+const timerDisplay = document.querySelector<HTMLHeadingElement>("#gameTimer")!;
 
 const socket = io(import.meta.env.VITE_API_URL);
 
@@ -50,6 +52,7 @@ const startGame = () => {
 
   // Create the canvas
   canvas.classList.remove("hidden");
+  timerDisplay.classList.remove("hidden");
 
   // Display the room ID
   roomIdElement.textContent = `Room ID: ${roomId}`;
@@ -57,6 +60,21 @@ const startGame = () => {
   createGameButton.classList.add("hidden");
   joinGameButton.classList.add("hidden");
 };
+
+// Listen for the timer update from the server
+socket.on("timer updated", ({ timeLeft }) => {
+  const minutes = Math.floor(timeLeft / 60);
+  const seconds = timeLeft % 60;
+
+  // Format the time as MM:SS and display it
+  timerDisplay.textContent = `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+});
+
+// Listen for the game over event
+socket.on("game over", ({ reason }) => {
+  alert(`Game Over: ${reason}`);
+  timerDisplay.textContent = "0:00"; // Reset timer display
+});
 
 const createGameRoom = async () => {
   console.log("Creating game room...");

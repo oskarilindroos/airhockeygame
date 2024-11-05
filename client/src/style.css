@@ -63,3 +63,10 @@ button:hover {
   border: 0.15rem solid black;
   border-radius: 2rem;
 }
+
+#gameTimer {
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  margin: 10px;
+}
