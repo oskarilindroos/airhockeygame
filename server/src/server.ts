@@ -124,6 +124,12 @@ io.on("connection", (socket) => {
       }, 1000); // 1000 ms = 1 second
   });
 
+  // Handle leaving a room
+  socket.on("leave room", (roomId) => {
+    socket.leave(roomId);
+    socket.to(roomId).emit("user left", socket.id);
+  });
+
 
   // Handle player movement
   socket.on("player move", (data) => {
