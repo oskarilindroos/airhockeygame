@@ -1,22 +1,40 @@
 'use client'
-
 import { useEffect, useRef, useState } from 'react';
 import { io, Socket } from "socket.io-client";
 import { drawCenterCircle, drawCenterLine, drawGoals } from "./classes/graphics";
 import { Player } from "./classes/Player";
 import { Puck } from "./classes/Puck";
 import { GameState } from "./types/GameState"
+
+import Lobby from './components/Lobby';
 import './App.css'
 
 
 export default function AirHockey() {
+  const CANVAS_WIDTH = 300;
+  const CANVAS_HEIGHT = 600
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  const player = new Player(CANVAS_WIDTH / 2, CANVAS_HEIGHT - 40, 20, "green");
+  const opponent = new Player(CANVAS_WIDTH / 2, 40, 20, "red");
+  const puck = new Puck(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, 15, "black");
+
   const [roomId, setRoomId] = useState<string>('');
   const [isPlayerOne, setIsPlayerOne] = useState<boolean>(false);
   const [gameStarted, setGameStarted] = useState<boolean>(false);
   const [timerDisplay, setTimerDisplay] = useState<string>('5:00');
   const [socket, setSocket] = useState<Socket | null>(null);
-  const [gameState, setGameState] = useState<GameState | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_, setGameState] = useState<GameState | null>({
+    puck: puck,
+    players: [player, opponent],
+  });
+  const [isInLobby, setIsInLobby] = useState<boolean>(false);
+  const [isReady, setIsReady] = useState<boolean>(false);
+
+
+
+
 
   useEffect(() => {
     // Create the socket connection
@@ -29,23 +47,15 @@ export default function AirHockey() {
   }, []);
 
   useEffect(() => {
-    if (!socket || !gameStarted) return;
-
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if(!canvas){
+      return;
+    }
+
+    if (!socket || !gameStarted) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-
-    // The initial game state
-    const player = new Player(canvas.width / 2, canvas.height - 40, 20, "green");
-    const opponent = new Player(canvas.width / 2, 40, 20, "red");
-    const puck = new Puck(canvas.width / 2, canvas.height / 2, 15, "black");
-
-    setGameState({
-      puck: puck,
-      players: [player],
-    });
 
     let isMouseDown = false;
 
@@ -106,12 +116,6 @@ export default function AirHockey() {
 
       puck.x = data.puck.x;
       puck.y = data.puck.y;
-
-      //This takes cares of "gameState not used" error.
-      if(gameState != null)
-      {
-        console.log("gamestate not null");
-      }
 
       data.players.forEach((playerData) => {
         if (playerData.id === socket.id) return;
@@ -187,7 +191,8 @@ export default function AirHockey() {
     socket.once("room created", (newRoomId: string) => {
       console.log(`Game room created with roomId: ${newRoomId}`);
       setRoomId(newRoomId);
-      setGameStarted(true);
+      setIsInLobby(true);
+      //setGameStarted(true);
     });
   };
 
@@ -209,9 +214,25 @@ export default function AirHockey() {
 
     socket.once("room joined", () => {
       setRoomId(inputRoomId);
-      setGameStarted(true);
+      setIsInLobby(true);
+      //setGameStarted(true);
     });
   };
+
+  const leaveGameRoom = () => {
+    if (!socket) return;
+    socket.emit("leave room", roomId)
+    setIsInLobby(false);
+  }
+
+  if(isInLobby){
+    return (<Lobby
+      readyStatus={[isReady]}
+      roomId={roomId}
+      exitLobby={() =>{leaveGameRoom()}}
+      toggleReady={() =>{setIsReady(prev => !prev)}}
+      />)
+  }
 
 
   return (
@@ -242,8 +263,8 @@ export default function AirHockey() {
             <h2 id="gameTimer">{timerDisplay}</h2>
             <canvas
               ref={canvasRef}
-              width={300}
-              height={600}
+              width={CANVAS_WIDTH}
+              height={CANVAS_HEIGHT}
               id="gameCanvas"
             >
               Your browser does not support the canvas element.
@@ -252,7 +273,5 @@ export default function AirHockey() {
         )}
       </div>
     </div>
-
-    
   );
 }
