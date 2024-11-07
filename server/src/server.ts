@@ -8,12 +8,14 @@ import cors from "cors";
 import { Puck } from "./Puck";
 import { Player } from "./Player";
 import { GameStates } from "./types/GameState";
+import { LobbyStates } from "./types/LobbyState";
 
 import { addListenerCreateRoom } from "./socketListeners/AddListenerCreateRoom"
 
 const GAME_AREA = { width: 300, height: 600 };
 
 const gameStates: GameStates = {};
+const lobbyStates: LobbyStates = {};
 
 // Read PORT from .env or default to 5000
 const PORT = process.env.PORT || 5000;
@@ -55,7 +57,7 @@ app.get("/healthcheck", (_req, res) => {
 io.on("connection", (socket) => {
   console.log("user connected");
 
-  addListenerCreateRoom(socket, gameStates, GAME_AREA);
+  addListenerCreateRoom(socket, gameStates, GAME_AREA, lobbyStates);
 
   // Handle joining a room
   socket.on("join room", async (roomId) => {
@@ -73,19 +75,23 @@ io.on("connection", (socket) => {
     }
 
     // Add the joined player to the game state
+    const opponentId = gameStates[roomId].players[0].id;
     const playerTwo = new Player(GAME_AREA.width / 2, 40, 20, "red", socket.id);
     gameStates[roomId].players.push(playerTwo);
+    lobbyStates[roomId][socket.id] = {isReady: false};
 
     // Join the room
     socket.join(roomId);
     console.log(`User ${socket.id} joined room ${roomId}`);
 
     // Broadcast to all clients in the room that a new user has joined
-    socket.to(roomId).emit("user joined", socket.id);
+    socket.to(roomId).emit("user joined", socket.id, lobbyStates[roomId]);
 
     // Emit to the client that the room has been joined
-    socket.emit("room joined", socket.id);
+    socket.emit("room joined", socket.id, lobbyStates[roomId], opponentId);
+  });
 
+  const startGame = (roomId: string) =>{
     // Start the game loop for the room
     const FPS = 60;
     const gameInterval = setInterval(() => {
@@ -122,12 +128,13 @@ io.on("connection", (socket) => {
           io.to(roomId).emit("timer updated", { timeLeft: state.timeLeft });
         }
       }, 1000); // 1000 ms = 1 second
-  });
+  }
 
   // Handle leaving a room
   socket.on("leave room", (roomId) => {
+    delete lobbyStates[roomId][socket.id];
     socket.leave(roomId);
-    socket.to(roomId).emit("user left", socket.id);
+    socket.to(roomId).emit("user left", lobbyStates[roomId]);
   });
 
 
@@ -151,6 +158,12 @@ io.on("connection", (socket) => {
     // Update the player's location
     player.setLocation(location);
   });
+
+  socket.on("ready status changed", (roomId: string, isReady:  boolean) =>{
+    lobbyStates[roomId][socket.id].isReady = isReady;
+    console.log(lobbyStates[roomId])
+    socket.to(roomId).emit("lobby updated", lobbyStates[roomId])
+  })
 
   // Handle disconnect
   socket.on("disconnect", () => {

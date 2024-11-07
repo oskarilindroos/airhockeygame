@@ -1,14 +1,13 @@
+import { UseLobbyContext } from '../contextProviders/LobbyContextProvider';
 import '../App.css'
 
-type Props = {
-    roomId:string,
-    readyStatus:boolean[],
-    toggleReady: () => void,
-    exitLobby: () => void
-}
 
 
-const Lobby = ( {roomId, readyStatus ,toggleReady, exitLobby}: Props) =>{
+const Lobby = (
+    {exitLobby, toggleReady}:{exitLobby: () => void, toggleReady: () => void}
+) =>{
+    const {lobbyState, opponentId, isInLobby, isReady, playerId, roomId,
+        setLobbyState, setOpponentId, setIsInLobby, setIsReady, setPlayerId, setRoomId,} = UseLobbyContext();
     return(
         <div className="bodyReact">
             <div className="app">
@@ -18,11 +17,19 @@ const Lobby = ( {roomId, readyStatus ,toggleReady, exitLobby}: Props) =>{
                 </div>
 
                 <div className="space-y-4 mb-6">
-                    {readyStatus?.map((isReady, i) => (
-                    <div key={i} className="flex items-center justify-between bg-gray-800 p-4 rounded-lg">
-                        <span className="text-xl text-white">{`Player ${i + 1}: ${isReady ? 'Ready' : 'Not Ready'}`}</span>
+
+                    <div className="flex items-center justify-between bg-gray-800 p-4 rounded-lg">
+                        <span className="text-xl text-white">{`You: ${isReady ? 'Ready' : 'Not Ready'}`}</span>
                     </div>
-                    ))}
+
+                    {lobbyState[opponentId] ?
+                        <div className="flex items-center justify-between bg-gray-800 p-4 rounded-lg">
+                            <span className="text-xl text-white">{`Opponent: ${lobbyState[opponentId].isReady ? 'Ready' : 'Not Ready'}`}</span>
+                        </div>
+                        :
+                        <></>
+                    }
+
                 </div>
 
                 <div className="flex justify-between">
@@ -39,7 +46,7 @@ const Lobby = ( {roomId, readyStatus ,toggleReady, exitLobby}: Props) =>{
                     style={{backgroundColor:"#3f51b5"}}
                     onClick={toggleReady}
                     >
-                    {readyStatus[0] ? 'Cancel Ready' : 'Ready Up'}
+                    {isReady ? 'Cancel Ready' : 'Ready Up'}
                     </button>
                 </div>
             </div>
