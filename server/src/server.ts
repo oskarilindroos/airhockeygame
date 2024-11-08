@@ -141,24 +141,22 @@ io.on("connection", (socket) => {
       io.to(roomId).emit("gameState updated", gameStates[roomId]);
     }, 1000 / FPS);
 
+    // Separate Timer Interval
+    const timerInterval = setInterval(() => {
+      const state = gameStates[roomId];
+      if (!state) return;
 
-      // Separate Timer Interval
-      const timerInterval = setInterval(() => {
-        const state = gameStates[roomId];
-        if (!state) return;
-  
-        if (state.timeLeft <= 0) {
-          io.to(roomId).emit("game over", { reason: "Time's up!" });
-          clearInterval(gameInterval);
-          clearInterval(timerInterval);
-          delete gameStates[roomId];
-        } else {
-          state.timeLeft--;
-          io.to(roomId).emit("timer updated", { timeLeft: state.timeLeft });
-        }
-      }, 1000); // 1000 ms = 1 second
+      if (state.timeLeft <= 0) {
+        io.to(roomId).emit("game over", { reason: "Time's up!" });
+        clearInterval(gameInterval);
+        clearInterval(timerInterval);
+        delete gameStates[roomId];
+      } else {
+        state.timeLeft--;
+        io.to(roomId).emit("timer updated", { timeLeft: state.timeLeft });
+      }
+    }, 1000); // 1000 ms = 1 second
   });
-
 
   // Handle player movement
   socket.on("player move", (data) => {
@@ -191,4 +189,3 @@ io.on("connection", (socket) => {
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
