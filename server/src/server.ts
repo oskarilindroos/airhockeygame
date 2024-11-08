@@ -35,8 +35,12 @@ const io = new Server(server, {
 
 // Enable the admin UI for socket.io
 instrument(io, {
-  auth: false,
-  mode: "development",
+  auth: {
+    type: "basic",
+    username: process.env.SOCKET_IO_USERNAME!,
+    password: process.env.SOCKET_IO_PASSWORD!,
+  },
+  mode: process.env.NODE_ENV === "production" ? "production" : "development",
 });
 
 // CORS middleware
@@ -137,24 +141,22 @@ io.on("connection", (socket) => {
       io.to(roomId).emit("gameState updated", gameStates[roomId]);
     }, 1000 / FPS);
 
+    // Separate Timer Interval
+    const timerInterval = setInterval(() => {
+      const state = gameStates[roomId];
+      if (!state) return;
 
-      // Separate Timer Interval
-      const timerInterval = setInterval(() => {
-        const state = gameStates[roomId];
-        if (!state) return;
-  
-        if (state.timeLeft <= 0) {
-          io.to(roomId).emit("game over", { reason: "Time's up!" });
-          clearInterval(gameInterval);
-          clearInterval(timerInterval);
-          delete gameStates[roomId];
-        } else {
-          state.timeLeft--;
-          io.to(roomId).emit("timer updated", { timeLeft: state.timeLeft });
-        }
-      }, 1000); // 1000 ms = 1 second
+      if (state.timeLeft <= 0) {
+        io.to(roomId).emit("game over", { reason: "Time's up!" });
+        clearInterval(gameInterval);
+        clearInterval(timerInterval);
+        delete gameStates[roomId];
+      } else {
+        state.timeLeft--;
+        io.to(roomId).emit("timer updated", { timeLeft: state.timeLeft });
+      }
+    }, 1000); // 1000 ms = 1 second
   });
-
 
   // Handle player movement
   socket.on("player move", (data) => {
@@ -187,4 +189,3 @@ io.on("connection", (socket) => {
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
