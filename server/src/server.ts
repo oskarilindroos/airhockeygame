@@ -7,7 +7,7 @@ import cors from "cors";
 import { Puck } from "./Puck";
 import { Player } from "./Player";
 import { GameStates } from "./types/GameState";
-import { generateRandomRoomId, generateRoomId } from "./utils/random";
+import { generateRandomString } from "./utils/random";
 
 const GAME_AREA = { width: 300, height: 600 };
 
@@ -59,7 +59,7 @@ io.on("connection", (socket) => {
 
   // Handle creating a room
   socket.on("create room", () => {
-    const roomId = generateRandomRoomId();
+    const roomId = generateRandomString(6);
 
     // Initialize the game state if it doesn't exist
     if (!gameStates[roomId]) {
