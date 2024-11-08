@@ -1,6 +1,5 @@
 import express from "express";
 import morgan from "morgan";
-import { v4 as uuidv4 } from "uuid";
 import { createServer } from "node:http";
 import { Server } from "socket.io";
 import { instrument } from "@socket.io/admin-ui";
@@ -8,6 +7,7 @@ import cors from "cors";
 import { Puck } from "./Puck";
 import { Player } from "./Player";
 import { GameStates } from "./types/GameState";
+import { generateRandomRoomId, generateRoomId } from "./utils/random";
 
 const GAME_AREA = { width: 300, height: 600 };
 
@@ -59,7 +59,7 @@ io.on("connection", (socket) => {
 
   // Handle creating a room
   socket.on("create room", () => {
-    const roomId = uuidv4(); // Generate a unique room ID
+    const roomId = generateRandomRoomId();
 
     // Initialize the game state if it doesn't exist
     if (!gameStates[roomId]) {
