@@ -136,7 +136,14 @@ io.on("connection", (socket) => {
       }
 
       // Update puck position
-      puck.calcPosition(GAME_AREA.width, GAME_AREA.height);
+      puck.calcPosition(GAME_AREA.width, GAME_AREA.height, gameStates[roomId].players);
+
+      // Check if socre limit is hit
+      if (gameStates[roomId].players[0].score === 2 || gameStates[roomId].players[1].score === 2) {
+        io.to(roomId).emit("game over", gameStates[roomId]);
+        clearInterval(gameInterval);
+        return;
+      }
 
       io.to(roomId).emit("gameState updated", gameStates[roomId]);
     }, 1000 / FPS);

@@ -239,6 +239,9 @@ export default function AirHockey() {
         ) : (
           <>
             <p id="roomId">Room ID: {roomId}</p>
+            <p id="Score">
+              {gameState?.players[0]?.score ?? 0} : {gameState?.players[1]?.score ?? 0}
+            </p>
             <h2 id="gameTimer">{timerDisplay}</h2>
             <canvas
               ref={canvasRef}
@@ -253,6 +256,6 @@ export default function AirHockey() {
       </div>
     </div>
 
-    
+
   );
 }

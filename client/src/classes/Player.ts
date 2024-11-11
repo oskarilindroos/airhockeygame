@@ -8,6 +8,8 @@ export class Player extends GameObject {
 
   public id: string = "";
 
+  public score: number = 0;
+
   handleMouseMove(
     event: MouseEvent,
     canvas: HTMLCanvasElement,
