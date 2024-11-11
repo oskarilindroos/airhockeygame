@@ -1,6 +1,8 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react';
+import toastr from "toastr";
+import "toastr/build/toastr.min.css";
 import { io, Socket } from "socket.io-client";
 import { drawCenterCircle, drawCenterLine, drawGoals } from "./classes/graphics";
 import { Player } from "./classes/Player";
@@ -131,7 +133,8 @@ export default function AirHockey() {
 
     // Listen for the game over event
     socket.on("game over", ({ reason }: { reason: string }) => {
-      alert(`Game Over: ${reason}`);
+      toastr.success("Game Over", `${reason}`);
+      
       setTimerDisplay("0:00"); // Reset timer display
     });
 
@@ -199,12 +202,12 @@ export default function AirHockey() {
 
     socket.emit("join room", inputRoomId);
 
-    socket.once("room not found", () => {
-      alert("Room not found");
+    socket.once("room not found", () => { 
+      toastr.error("Room not found");
     });
 
     socket.once("room full", () => {
-      alert("Room is full");
+      toastr.error("Room is full");
     });
 
     socket.once("room joined", () => {
