@@ -6,8 +6,7 @@ import '../App.css'
 const Lobby = (
     {exitLobby, toggleReady}:{exitLobby: () => void, toggleReady: () => void}
 ) =>{
-    const {lobbyState, opponentId, isInLobby, isReady, playerId, roomId,
-        setLobbyState, setOpponentId, setIsInLobby, setIsReady, setPlayerId, setRoomId,} = UseLobbyContext();
+    const {lobbyState, opponentId, isReady, roomId,} = UseLobbyContext();
     return(
         <div className="bodyReact">
             <div className="app">
@@ -22,9 +21,9 @@ const Lobby = (
                         <span className="text-xl text-white">{`You: ${isReady ? 'Ready' : 'Not Ready'}`}</span>
                     </div>
 
-                    {lobbyState[opponentId] ?
+                    {opponentId !== '' ?
                         <div className="flex items-center justify-between bg-gray-800 p-4 rounded-lg">
-                            <span className="text-xl text-white">{`Opponent: ${lobbyState[opponentId].isReady ? 'Ready' : 'Not Ready'}`}</span>
+                            <span className="text-xl text-white">{`Opponent: ${lobbyState.playerReadyStatus[opponentId].isReady ? 'Ready' : 'Not Ready'}`}</span>
                         </div>
                         :
                         <></>

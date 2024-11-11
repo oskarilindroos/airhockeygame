@@ -74,26 +74,51 @@ io.on("connection", (socket) => {
       return;
     }
 
-    // Add the joined player to the game state
-    const opponentId = gameStates[roomId].players[0].id;
-    const playerTwo = new Player(GAME_AREA.width / 2, 40, 20, "red", socket.id);
-    gameStates[roomId].players.push(playerTwo);
-    lobbyStates[roomId][socket.id] = {isReady: false};
+    // Add the joined player to the lobby state
+    const lobbyState = lobbyStates[roomId];
+    lobbyState.playerTwo = socket.id;
+    lobbyState.playerReadyStatus[socket.id] = {isReady: false};
 
     // Join the room
     socket.join(roomId);
     console.log(`User ${socket.id} joined room ${roomId}`);
 
     // Broadcast to all clients in the room that a new user has joined
-    socket.to(roomId).emit("user joined", socket.id, lobbyStates[roomId]);
+    socket.to(roomId).emit("user joined", socket.id, lobbyState);
 
     // Emit to the client that the room has been joined
-    socket.emit("room joined", socket.id, lobbyStates[roomId], opponentId);
+    socket.emit("room joined", lobbyState);
   });
 
+  const initializeGameState = (roomId: string) => {
+        // Initialize the game state if it doesn't exist
+        if (!gameStates[roomId]) {
+          const puck = new Puck(
+            GAME_AREA.width / 2, GAME_AREA.height / 2, 15, "black"
+          );
+
+          // NOTE: Player 1 is always the one that created the room
+          const playerOne = new Player(
+            GAME_AREA.width / 2, GAME_AREA.height - 40, 20, "green", socket.id
+          );
+
+          const playerTwo = new Player(
+            GAME_AREA.width / 2, 40, 20, "red", lobbyStates[roomId].playerTwo
+          );
+
+          gameStates[roomId] = {
+            puck,
+            players: [playerOne, playerTwo],
+            timeLeft: 300,
+          };
+        }
+  }
+
   const startGame = (roomId: string) =>{
-    // Start the game loop for the room
+    initializeGameState(roomId);
     const FPS = 60;
+
+    // Start the game loop for the room
     const gameInterval = setInterval(() => {
       const puck = gameStates[roomId].puck;
       const state = gameStates[roomId];
@@ -109,7 +134,7 @@ io.on("connection", (socket) => {
       // Update puck position
       puck.calcPosition(GAME_AREA.width, GAME_AREA.height);
 
-      io.to(roomId).emit("gameState updated", gameStates[roomId]);
+      io.to(roomId).emit("gameState updated", state);
     }, 1000 / FPS);
 
 
@@ -132,9 +157,15 @@ io.on("connection", (socket) => {
 
   // Handle leaving a room
   socket.on("leave room", (roomId) => {
-    delete lobbyStates[roomId][socket.id];
+    const roomSize = io.sockets.adapter.rooms.get(roomId)?.size;
+    const lobbyState = lobbyStates[roomId];
+    if (socket.id === lobbyState.playerOne && roomSize === 2){
+      lobbyState.playerOne = lobbyState.playerTwo;
+    }
+    lobbyState.playerTwo = '';
+    delete lobbyState.playerReadyStatus[socket.id];
     socket.leave(roomId);
-    socket.to(roomId).emit("user left", lobbyStates[roomId]);
+    socket.to(roomId).emit("user left", lobbyState);
   });
 
 
@@ -160,8 +191,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("ready status changed", (roomId: string, isReady:  boolean) =>{
-    lobbyStates[roomId][socket.id].isReady = isReady;
-    console.log(lobbyStates[roomId])
+    lobbyStates[roomId].playerReadyStatus[socket.id].isReady = isReady;
     socket.to(roomId).emit("lobby updated", lobbyStates[roomId])
   })
 

@@ -32,8 +32,7 @@ export default function AirHockey() {
   });
 
 
-  const {lobbyState, opponentId, isInLobby, isReady, playerId, roomId,
-    setLobbyState, setOpponentId, setIsInLobby, setIsReady, setPlayerId, setRoomId}
+  const {isInLobby, roomId, setLobbyState, setOpponentId, setIsInLobby, setIsReady, setPlayerId, setRoomId}
     = UseLobbyContext();
 
   const addLobbyListeners = () => {
@@ -45,7 +44,8 @@ export default function AirHockey() {
     socket?.on("user left", (lobbyState: LobbyState) => {
       setOpponentId('');
       setLobbyState(lobbyState);
-      alert("Your opponent left the game")
+      alert("Your opponent left the game");
+      setIsPlayerOne(true);
     });
 
     // Listen for when a user joins the room
@@ -236,9 +236,9 @@ export default function AirHockey() {
       alert("Room is full");
     });
 
-    socket.once("room joined", (_:string, lobbyState: LobbyState, opponentId: string) => {
+    socket.once("room joined", (lobbyState: LobbyState) => {
       setRoomId(inputRoomId);
-      setOpponentId(opponentId);
+      setOpponentId(lobbyState.playerOne);
       setLobbyState(lobbyState);
       setIsInLobby(true);
       //setGameStarted(true);

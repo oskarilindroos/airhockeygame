@@ -14,35 +14,10 @@ export const addListenerCreateRoom = (
   socket.on("create room", () => {
     const roomId = uuidv4(); // Generate a unique room ID
 
-    // Initialize the game state if it doesn't exist
-    if (!gameStates[roomId]) {
-      const puck = new Puck(
-        GAME_AREA.width / 2,
-        GAME_AREA.height / 2,
-        15,
-        "black",
-      );
-
-      // NOTE: Player 1 is always the one that created the room
-      const playerOne = new Player(
-        GAME_AREA.width / 2,
-        GAME_AREA.height - 40,
-        20,
-        "green",
-        socket.id,
-      );
-
-      gameStates[roomId] = {
-        puck,
-        players: [playerOne],
-        timeLeft: 300,
-      };
-    }
-
     // Initialize lobby state
     if (!lobbyStates[roomId]){
-      lobbyStates[roomId] = {};
-      lobbyStates[roomId][socket.id] = {isReady: false};
+      lobbyStates[roomId] = {playerReadyStatus: {}, playerOne: socket.id, playerTwo: ''};
+      lobbyStates[roomId].playerReadyStatus[socket.id] = {isReady: false};
     }
 
     // Join the newly created room

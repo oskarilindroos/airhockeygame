@@ -5,7 +5,7 @@ import { LobbyContextType } from "../types/LobbyContextType";
 const lobbyContext = createContext<LobbyContextType | undefined>(undefined);
 
 export const LobbyContextProvider = ({children}:{children:React.ReactNode}) => {
-    const [lobbyState, setLobbyState] = useState<LobbyState>({});
+    const [lobbyState, setLobbyState] = useState<LobbyState>({playerReadyStatus: {}, playerOne: '', playerTwo: ''});
     const [opponentId, setOpponentId] = useState<string>('');
     const [isInLobby, setIsInLobby] = useState<boolean>(false);
     const [isReady, setIsReady] = useState<boolean>(false);
