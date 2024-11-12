@@ -1,21 +1,22 @@
 import express from "express";
 import morgan from "morgan";
-import { v4 as uuidv4 } from "uuid";
 import { createServer } from "node:http";
-import { Server } from "socket.io";
+import { Server, Socket } from "socket.io";
 import { instrument } from "@socket.io/admin-ui";
 import cors from "cors";
 import { Puck } from "./Puck";
 import { Player } from "./Player";
 import { GameStates } from "./types/GameState";
 import { LobbyStates } from "./types/LobbyState";
-
 import { addListenerCreateRoom } from "./socketListeners/AddListenerCreateRoom"
 
 const GAME_AREA = { width: 300, height: 600 };
+const TIME_LIMIT_SEC = 20;
 
 const gameStates: GameStates = {};
 const lobbyStates: LobbyStates = {};
+
+let gameInterval: NodeJS.Timeout, timerInterval: NodeJS.Timeout;
 
 // Read PORT from .env or default to 5000
 const PORT = process.env.PORT || 5000;
@@ -53,11 +54,113 @@ app.get("/healthcheck", (_req, res) => {
   res.status(200).send("OK");
 });
 
+const gameOver = (roomId: string, reason: string) => {
+  const lobbyState = lobbyStates[roomId];
+  if (lobbyState.playerTwo !== ''){
+    lobbyState.playerReadyStatus[lobbyState.playerTwo].isReady = false;
+  }
+  lobbyState.playerReadyStatus[lobbyState.playerOne].isReady = false;
+  io.in(roomId).emit("game over", { reason: reason }, lobbyState);
+  clearInterval(gameInterval);
+  clearInterval(timerInterval);
+  delete gameStates[roomId];
+}
+
+// Handle leaving a room
+const leaveRoom = (socket: Socket, roomId: string) => {
+
+  const lobbyState = lobbyStates[roomId];
+
+  const roomSize = io.sockets.adapter.rooms.get(roomId)?.size;
+  if (socket.id === lobbyState.playerOne && roomSize === 2){
+    lobbyState.playerOne = lobbyState.playerTwo;
+  }
+
+  lobbyState.playerTwo = '';
+  delete lobbyState.playerReadyStatus[socket.id];
+
+  socket.to(roomId).emit("user left", lobbyState, socket.id);
+
+  if (gameStates[roomId]){
+    gameOver(roomId, "Your oppnent left the game")
+  }
+
+
+}
+
+const initializeGameState = (roomId: string) => {
+  // Initialize the game state if it doesn't exist
+  if (!gameStates[roomId]) {
+    const lobbyState = lobbyStates[roomId]
+    const puck = new Puck(
+      GAME_AREA.width / 2, GAME_AREA.height / 2, 15, "black"
+    );
+
+    // NOTE: Player 1 is always the one that created the room
+    const playerOne = new Player(
+      GAME_AREA.width / 2, GAME_AREA.height - 40, 20, "green", lobbyState.playerOne
+    );
+
+    const playerTwo = new Player(
+      GAME_AREA.width / 2, 40, 20, "red", lobbyState.playerTwo
+    );
+
+    gameStates[roomId] = {
+      puck,
+      players: [playerOne, playerTwo],
+      timeLeft: TIME_LIMIT_SEC,
+    };
+  }
+}
+
+const startGame = (roomId: string) =>{
+  initializeGameState(roomId);
+  const FPS = 60;
+
+  // Start the game loop for the room
+  gameInterval = setInterval(() => {
+    const puck = gameStates[roomId].puck;
+    const state = gameStates[roomId];
+
+    // Puck collision detection
+    for (const player of gameStates[roomId].players) {
+      if (puck.playerCollisionCheck(player)) {
+        puck.playerPenetrationResponse(player);
+        puck.playerCollisionResponse(player);
+      }
+    }
+
+    // Update puck position
+    puck.calcPosition(GAME_AREA.width, GAME_AREA.height);
+
+    io.to(roomId).emit("gameState updated", state);
+  }, 1000 / FPS);
+
+
+  // Separate Timer Interval
+  timerInterval = setInterval(() => {
+    const state = gameStates[roomId];
+    if (!state) return;
+
+    if (state.timeLeft <= 0) {
+      gameOver(roomId, "Time's up!")
+    } else {
+      state.timeLeft--;
+      io.to(roomId).emit("timer updated", { timeLeft: state.timeLeft });
+    }
+  }, 1000); // 1000 ms = 1 second
+}
+
 // Websocket connections
 io.on("connection", (socket) => {
   console.log("user connected");
 
   addListenerCreateRoom(socket, gameStates, GAME_AREA, lobbyStates);
+
+  socket.on("start game", (roomId: string) =>{
+    io.in(roomId).emit("game started")
+    startGame(roomId);
+  })
 
   // Handle joining a room
   socket.on("join room", async (roomId) => {
@@ -90,84 +193,10 @@ io.on("connection", (socket) => {
     socket.emit("room joined", lobbyState);
   });
 
-  const initializeGameState = (roomId: string) => {
-        // Initialize the game state if it doesn't exist
-        if (!gameStates[roomId]) {
-          const puck = new Puck(
-            GAME_AREA.width / 2, GAME_AREA.height / 2, 15, "black"
-          );
-
-          // NOTE: Player 1 is always the one that created the room
-          const playerOne = new Player(
-            GAME_AREA.width / 2, GAME_AREA.height - 40, 20, "green", socket.id
-          );
-
-          const playerTwo = new Player(
-            GAME_AREA.width / 2, 40, 20, "red", lobbyStates[roomId].playerTwo
-          );
-
-          gameStates[roomId] = {
-            puck,
-            players: [playerOne, playerTwo],
-            timeLeft: 300,
-          };
-        }
-  }
-
-  const startGame = (roomId: string) =>{
-    initializeGameState(roomId);
-    const FPS = 60;
-
-    // Start the game loop for the room
-    const gameInterval = setInterval(() => {
-      const puck = gameStates[roomId].puck;
-      const state = gameStates[roomId];
-
-      // Puck collision detection
-      for (const player of gameStates[roomId].players) {
-        if (puck.playerCollisionCheck(player)) {
-          puck.playerPenetrationResponse(player);
-          puck.playerCollisionResponse(player);
-        }
-      }
-
-      // Update puck position
-      puck.calcPosition(GAME_AREA.width, GAME_AREA.height);
-
-      io.to(roomId).emit("gameState updated", state);
-    }, 1000 / FPS);
-
-
-      // Separate Timer Interval
-      const timerInterval = setInterval(() => {
-        const state = gameStates[roomId];
-        if (!state) return;
-
-        if (state.timeLeft <= 0) {
-          io.to(roomId).emit("game over", { reason: "Time's up!" });
-          clearInterval(gameInterval);
-          clearInterval(timerInterval);
-          delete gameStates[roomId];
-        } else {
-          state.timeLeft--;
-          io.to(roomId).emit("timer updated", { timeLeft: state.timeLeft });
-        }
-      }, 1000); // 1000 ms = 1 second
-  }
-
-  // Handle leaving a room
   socket.on("leave room", (roomId) => {
-    const roomSize = io.sockets.adapter.rooms.get(roomId)?.size;
-    const lobbyState = lobbyStates[roomId];
-    if (socket.id === lobbyState.playerOne && roomSize === 2){
-      lobbyState.playerOne = lobbyState.playerTwo;
-    }
-    lobbyState.playerTwo = '';
-    delete lobbyState.playerReadyStatus[socket.id];
+    leaveRoom(socket, roomId);
     socket.leave(roomId);
-    socket.to(roomId).emit("user left", lobbyState);
   });
-
 
   // Handle player movement
   socket.on("player move", (data) => {
@@ -196,6 +225,17 @@ io.on("connection", (socket) => {
   })
 
   // Handle disconnect
+  socket.on("disconnecting", () => {
+    let rooms = Array.from(socket.rooms);
+
+    // socket.rooms always contains socket ID, but we don't want it
+    rooms = rooms.filter( id => id !== socket.id);
+
+    for (const roomId of rooms){
+      leaveRoom(socket, roomId);
+    }
+  });
+
   socket.on("disconnect", () => {
     console.log("user disconnected");
   });
