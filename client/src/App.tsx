@@ -25,6 +25,7 @@ export default function AirHockey() {
   const [gameStarted, setGameStarted] = useState<boolean>(false);
   const [timerDisplay, setTimerDisplay] = useState<string>('5:00');
   const [socket, setSocket] = useState<Socket | null>(null);
+  const [gameState, setGameState] = useState<GameState | null>(null);
 
 
   const {isInLobby, roomId, setLobbyState, setOpponentId, setIsInLobby, setIsReady, setPlayerId, setRoomId} = UseLobbyContext();
@@ -149,7 +150,7 @@ export default function AirHockey() {
 
     // Listen for game state updates from the server
     socket.on("gameState updated", (data: GameState) => {
-
+      setGameState(data);
       puck.x = data.puck.x;
       puck.y = data.puck.y;
 
