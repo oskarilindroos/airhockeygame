@@ -16,6 +16,7 @@ const gameStates: GameStates = {};
 // Read PORT from .env or default to 5000
 const PORT = process.env.PORT || 5000;
 
+
 // CORS origins must be set
 if (process.env.CORS_ORIGINS === undefined) {
   throw new Error("CORS_ORIGINS environment variable is required");
