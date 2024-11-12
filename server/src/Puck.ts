@@ -10,8 +10,9 @@ export class Puck extends GameObject {
    * Calculates the location of the puck in the current frame based on velocity
    * @param areaWidth
    * @param areaHeight
+   * @param players
    */
-  calcPosition(areaWidth: number, areaHeight: number) {
+  calcPosition(areaWidth: number, areaHeight: number, players: Player[]) {
     let hitWall: boolean = false;
 
     //Stops puck from going out of bounds left
@@ -30,16 +31,24 @@ export class Puck extends GameObject {
 
     //Stops puck from going out of bounds top
     if (this.y - this.radius <= 0) {
-      this.y = 1 + this.radius;
-      this.velocity.y = -this.velocity.y;
-      hitWall = true; //Add a bit of friction
+      if(this.goalCollisionCheck(areaHeight, areaWidth)) {
+        this.resetPuck(areaWidth, areaHeight, players[0]);
+      } else {
+        this.y = 1 + this.radius;
+        this.velocity.y = -this.velocity.y;
+        hitWall = true; //Add a bit of friction
+      }
     }
 
     //Stops puck from going out of bounds bottom
-    if (this.y + this.radius >= areaHeight) {
-      this.y = areaHeight - 1 - this.radius;
-      this.velocity.y = -this.velocity.y;
-      hitWall = true; //Add a bit of friction
+  if (this.y + this.radius >= areaHeight) {
+      if(this.goalCollisionCheck(areaHeight, areaWidth)) {
+        this.resetPuck(areaWidth, areaHeight, players[1]);
+      } else {
+        this.y = areaHeight - 1 - this.radius;
+        this.velocity.y = -this.velocity.y;
+        hitWall = true; //Add a bit of friction
+      }
     }
 
     //reduce puck velocity with friction
@@ -118,5 +127,49 @@ export class Puck extends GameObject {
     if (player.velocity().x > 0.5 || player.velocity().y > 0.5) {
       this.friction = 0.1;
     }
+  }
+
+  /**
+   * Check if puck hits the goal
+   * @param areaWidth
+   * @param areaHeight
+   * @param player
+   */
+  goalCollisionCheck(areaHeight: number, areaWidth: number) {
+      // Check if puck hits the top of play area and is within goal boundaries
+    if (this.y - this.radius <= 0 &&
+      this.x > areaWidth / 2 - 50 &&
+      this.x < areaWidth / 2 + 50) {
+      return true;
+    }
+
+    // Check if puck hits the bottom of play area and is within goal boundaries
+    if (this.y + this.radius >= areaHeight &&
+      this.x > areaWidth / 2 - 50 &&
+      this.x < areaWidth / 2 + 50) {
+      return true;
+    }
+    return false;
+  }
+
+    /**
+   * Reset puck after player scores
+   * @param areaWidth
+   * @param areaHeight
+   * @param player
+   */
+
+  resetPuck(areaWidth: number, areaHeight: number, player: Player) {
+    //Set puck position
+    this.x = areaWidth / 2;
+    this.y = areaHeight / 2
+
+    //Set puck velocity
+    this.velocity = new Vector(0, 0);
+
+    //Set puck friction
+    this.friction = 0.0;
+
+    player.increaseScore();
   }
 }

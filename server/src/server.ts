@@ -21,6 +21,7 @@ let gameInterval: NodeJS.Timeout, timerInterval: NodeJS.Timeout;
 // Read PORT from .env or default to 5000
 const PORT = process.env.PORT || 5000;
 
+
 // CORS origins must be set
 if (process.env.CORS_ORIGINS === undefined) {
   throw new Error("CORS_ORIGINS environment variable is required");
@@ -143,7 +144,14 @@ const startGame = (roomId: string) => {
     }
 
     // Update puck position
-    puck.calcPosition(GAME_AREA.width, GAME_AREA.height);
+    puck.calcPosition(GAME_AREA.width, GAME_AREA.height, gameStates[roomId].players);
+
+    // Check if socre limit is hit
+    if (gameStates[roomId].players[0].score === 5 || gameStates[roomId].players[1].score === 5) {
+      io.to(roomId).emit("game over", gameStates[roomId]);
+      clearInterval(gameInterval);
+      return;
+    }
 
     io.to(roomId).emit("gameState updated", state);
   }, 1000 / FPS);

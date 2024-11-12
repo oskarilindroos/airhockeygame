@@ -10,6 +10,8 @@ export class Player extends GameObject {
 
   public id: string = "";
 
+  public score: number = 0;
+
   private clickRadius = this.radius + CLICK_ZONE;
   private mouseOffset = new Vector(0,0);
 
