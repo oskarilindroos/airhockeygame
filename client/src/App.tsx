@@ -1,51 +1,101 @@
 'use client'
-
 import { useEffect, useRef, useState } from 'react';
 import { io, Socket } from "socket.io-client";
 import { drawCenterCircle, drawCenterLine, drawGoals } from "./classes/graphics";
 import { Player } from "./classes/Player";
 import { Puck } from "./classes/Puck";
 import { GameState } from "./types/GameState"
+
+import Lobby from './components/Lobby';
 import './App.css'
+import { LobbyState} from './types/LobbyState';
+import { UseLobbyContext } from './contextProviders/LobbyContextProvider';
 
 
 export default function AirHockey() {
+  const CANVAS_WIDTH = 300;
+  const CANVAS_HEIGHT = 600
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [roomId, setRoomId] = useState<string>('');
+
+  const player = new Player(CANVAS_WIDTH / 2, CANVAS_HEIGHT - 40, 20, "green");
+  const opponent = new Player(CANVAS_WIDTH / 2, 40, 20, "red");
+  const puck = new Puck(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, 15, "black");
+
   const [isPlayerOne, setIsPlayerOne] = useState<boolean>(false);
   const [gameStarted, setGameStarted] = useState<boolean>(false);
   const [timerDisplay, setTimerDisplay] = useState<string>('5:00');
   const [socket, setSocket] = useState<Socket | null>(null);
-  const [gameState, setGameState] = useState<GameState | null>(null);
+
+
+  const {isInLobby, roomId, setLobbyState, setOpponentId, setIsInLobby, setIsReady, setPlayerId, setRoomId} = UseLobbyContext();
+
+  const addUserLeftListener = () => {
+    // Listen for when a user leaves the room
+    socket?.once("user left", (lobbyState: LobbyState, socketId: string) => {
+      setOpponentId('');
+      setLobbyState(lobbyState);
+      if (!gameStarted){
+        alert("Your opponent left the lobby");
+      }
+      console.log(`User ${socketId} left`);
+      setIsInLobby(true);
+      setIsPlayerOne(true);
+    });
+  }
+
+  const addLobbyListeners = () => {
+    socket?.on("lobby updated", (state: LobbyState)=>{
+      setLobbyState(state)
+    });
+
+    // Listen for when a user joins the room
+    socket?.on("user joined", (socketId:string, lobbyState: LobbyState) => {
+
+      console.log(`User (${socketId}) joined the room`);
+      setOpponentId(socketId);
+      setLobbyState(lobbyState);
+
+      addUserLeftListener();
+    });
+
+    socket?.on("game started", () =>{
+      // Listen for the game over event
+      socket?.once("game over", ({ reason }: { reason: string }, lobbyState: LobbyState) => {
+
+        setLobbyState(lobbyState);
+        setIsReady(false);
+        setGameStarted(false);
+        setIsInLobby(true);
+        alert(`Game Over: ${reason}`);
+        setTimerDisplay("0:00"); // Reset timer display
+
+      });
+      setGameStarted(true);
+      setIsInLobby(false);
+    });
+  }
+
 
   useEffect(() => {
     // Create the socket connection
-    const newSocket = io(import.meta.env.VITE_API_URL || '');
-    setSocket(newSocket);
+    if (socket === null){
+      const newSocket = io(import.meta.env.VITE_API_URL || '');
+      setSocket(newSocket);
 
-    return () => {
-      newSocket.disconnect();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!socket || !gameStarted) return;
+      if(newSocket.id){
+        setPlayerId(newSocket.id);
+      }
+    }
 
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if(!canvas){
+      return;
+    }
+
+    if (!socket || !gameStarted) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-
-    // The initial game state
-    const player = new Player(canvas.width / 2, canvas.height - 40, 20, "green");
-    const opponent = new Player(canvas.width / 2, 40, 20, "red");
-    const puck = new Puck(canvas.width / 2, canvas.height / 2, 15, "black");
-
-    setGameState({
-      puck: puck,
-      players: [player],
-    });
 
     let isMouseDown = false;
 
@@ -95,23 +145,13 @@ export default function AirHockey() {
     canvas.addEventListener("touchend", handleTouchEnd);
     canvas.addEventListener("touchmove", handleTouchMove);
 
-    // Listen for when a user joins the room
-    socket.on("user joined", (userId: string) => {
-      console.log(`User (${userId}) joined the room`);
-    });
+
 
     // Listen for game state updates from the server
     socket.on("gameState updated", (data: GameState) => {
-      setGameState(data);
 
       puck.x = data.puck.x;
       puck.y = data.puck.y;
-
-      //This takes cares of "gameState not used" error.
-      if(gameState != null)
-      {
-        console.log("gamestate not null");
-      }
 
       data.players.forEach((playerData) => {
         if (playerData.id === socket.id) return;
@@ -127,12 +167,6 @@ export default function AirHockey() {
 
       // Format the time as MM:SS and display it
       setTimerDisplay(`${minutes}:${seconds < 10 ? "0" : ""}${seconds}`);
-    });
-
-    // Listen for the game over event
-    socket.on("game over", ({ reason }: { reason: string }) => {
-      alert(`Game Over: ${reason}`);
-      setTimerDisplay("0:00"); // Reset timer display
     });
 
     // Main game loop
@@ -173,9 +207,10 @@ export default function AirHockey() {
       canvas.removeEventListener("touchend", handleTouchEnd);
       canvas.removeEventListener("touchmove", handleTouchMove);
     };
-  }, [socket, roomId, isPlayerOne, gameStarted]);
+  }, [gameStarted]);
 
   const createGameRoom = () => {
+    setIsReady(false);
     if (!socket) return;
     console.log("Creating game room...");
     setIsPlayerOne(true);
@@ -184,14 +219,18 @@ export default function AirHockey() {
     socket.emit("create room");
 
     // Listen for the room created event
-    socket.once("room created", (newRoomId: string) => {
-      console.log(`Game room created with roomId: ${newRoomId}`);
-      setRoomId(newRoomId);
-      setGameStarted(true);
+    socket.once("room created", ({roomId, lobbyState} : {roomId: string, lobbyState:LobbyState}) => {
+      console.log(`Game room created with roomId: ${roomId}`);
+      setRoomId(roomId);
+      setLobbyState(lobbyState);
+      setIsInLobby(true);
     });
+
+    addLobbyListeners();
   };
 
   const joinGameRoom = () => {
+    setIsReady(false);
     if (!socket) return;
     const inputRoomId = prompt("Enter the room ID") || "";
 
@@ -207,11 +246,44 @@ export default function AirHockey() {
       alert("Room is full");
     });
 
-    socket.once("room joined", () => {
+    socket.once("room joined", (lobbyState: LobbyState) => {
       setRoomId(inputRoomId);
-      setGameStarted(true);
+      setOpponentId(lobbyState.playerOne);
+      setLobbyState(lobbyState);
+      setIsInLobby(true);
+      addUserLeftListener();
     });
+
+    addLobbyListeners();
   };
+
+  const leaveGameRoom = () => {
+    socket?.emit("leave room", roomId);
+    socket?.removeAllListeners();
+    setIsInLobby(false);
+  }
+
+  const toggleReady = () => {
+    setIsReady(prev => {
+      const newState = !prev
+      socket?.emit("ready status changed", roomId, newState);
+      return newState
+    });
+  }
+
+  const startGame = () => {
+    setIsReady(false)
+    socket?.emit("start game", roomId)
+  }
+
+  if(isInLobby){
+    return (
+    <Lobby
+    exitLobby={leaveGameRoom}
+    toggleReady={toggleReady}
+    startGame={startGame}
+    />)
+  }
 
 
   return (
@@ -242,8 +314,8 @@ export default function AirHockey() {
             <h2 id="gameTimer">{timerDisplay}</h2>
             <canvas
               ref={canvasRef}
-              width={300}
-              height={600}
+              width={CANVAS_WIDTH}
+              height={CANVAS_HEIGHT}
               id="gameCanvas"
             >
               Your browser does not support the canvas element.
@@ -252,7 +324,5 @@ export default function AirHockey() {
         )}
       </div>
     </div>
-
-
   );
 }
