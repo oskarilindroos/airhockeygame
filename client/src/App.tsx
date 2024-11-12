@@ -8,7 +8,7 @@ import { GameState } from "./types/GameState"
 
 import Lobby from './components/Lobby';
 import './App.css'
-import { LobbyState} from '../../server/src/types/LobbyState';
+import { LobbyState} from './types/LobbyState';
 import { UseLobbyContext } from './contextProviders/LobbyContextProvider';
 
 

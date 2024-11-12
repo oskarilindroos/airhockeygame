@@ -11,7 +11,7 @@ import { LobbyStates } from "./types/LobbyState";
 import { addListenerCreateRoom } from "./socketListeners/AddListenerCreateRoom"
 
 const GAME_AREA = { width: 300, height: 600 };
-const TIME_LIMIT_SEC = 20;
+const TIME_LIMIT_SEC = 20; // Set to 20 seconds for testing purposes
 
 const gameStates: GameStates = {};
 const lobbyStates: LobbyStates = {};
