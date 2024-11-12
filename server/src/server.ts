@@ -40,8 +40,12 @@ const io = new Server(server, {
 
 // Enable the admin UI for socket.io
 instrument(io, {
-  auth: false,
-  mode: "development",
+  auth: {
+    type: "basic",
+    username: process.env.SOCKET_IO_USERNAME!,
+    password: process.env.SOCKET_IO_PASSWORD!,
+  },
+  mode: process.env.NODE_ENV === "production" ? "production" : "development",
 });
 
 // CORS middleware
@@ -245,4 +249,3 @@ io.on("connection", (socket) => {
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
