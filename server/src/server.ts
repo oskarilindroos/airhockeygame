@@ -8,7 +8,7 @@ import { Puck } from "./Puck";
 import { Player } from "./Player";
 import { GameStates } from "./types/GameState";
 import { LobbyStates } from "./types/LobbyState";
-import { addListenerCreateRoom } from "./socketListeners/AddListenerCreateRoom"
+import { addListenerCreateRoom } from "./socketListeners/AddListenerCreateRoom";
 
 const GAME_AREA = { width: 300, height: 600 };
 const TIME_LIMIT_SEC = 20; // Set to 20 seconds for testing purposes
@@ -60,7 +60,7 @@ app.get("/healthcheck", (_req, res) => {
 
 const gameOver = (roomId: string, reason: string) => {
   const lobbyState = lobbyStates[roomId];
-  if (lobbyState.playerTwo !== ''){
+  if (lobbyState.playerTwo !== "") {
     lobbyState.playerReadyStatus[lobbyState.playerTwo].isReady = false;
   }
   lobbyState.playerReadyStatus[lobbyState.playerOne].isReady = false;
@@ -68,45 +68,53 @@ const gameOver = (roomId: string, reason: string) => {
   clearInterval(gameInterval);
   clearInterval(timerInterval);
   delete gameStates[roomId];
-}
+};
 
 // Handle leaving a room
 const leaveRoom = (socket: Socket, roomId: string) => {
-
   const lobbyState = lobbyStates[roomId];
 
   const roomSize = io.sockets.adapter.rooms.get(roomId)?.size;
-  if (socket.id === lobbyState.playerOne && roomSize === 2){
+  if (socket.id === lobbyState.playerOne && roomSize === 2) {
     lobbyState.playerOne = lobbyState.playerTwo;
   }
 
-  lobbyState.playerTwo = '';
+  lobbyState.playerTwo = "";
   delete lobbyState.playerReadyStatus[socket.id];
 
   socket.to(roomId).emit("user left", lobbyState, socket.id);
 
-  if (gameStates[roomId]){
-    gameOver(roomId, "Your oppnent left the game")
+  if (gameStates[roomId]) {
+    gameOver(roomId, "Your oppnent left the game");
   }
-
-
-}
+};
 
 const initializeGameState = (roomId: string) => {
   // Initialize the game state if it doesn't exist
   if (!gameStates[roomId]) {
-    const lobbyState = lobbyStates[roomId]
+    const lobbyState = lobbyStates[roomId];
     const puck = new Puck(
-      GAME_AREA.width / 2, GAME_AREA.height / 2, 15, "black"
+      GAME_AREA.width / 2,
+      GAME_AREA.height / 2,
+      15,
+      "black",
     );
 
     // NOTE: Player 1 is always the one that created the room
     const playerOne = new Player(
-      GAME_AREA.width / 2, GAME_AREA.height - 40, 20, "green", lobbyState.playerOne
+      GAME_AREA.width / 2,
+      GAME_AREA.height - 40,
+      20,
+      "green",
+      lobbyState.playerOne,
     );
 
     const playerTwo = new Player(
-      GAME_AREA.width / 2, 40, 20, "red", lobbyState.playerTwo
+      GAME_AREA.width / 2,
+      40,
+      20,
+      "red",
+      lobbyState.playerTwo,
     );
 
     gameStates[roomId] = {
@@ -115,9 +123,9 @@ const initializeGameState = (roomId: string) => {
       timeLeft: TIME_LIMIT_SEC,
     };
   }
-}
+};
 
-const startGame = (roomId: string) =>{
+const startGame = (roomId: string) => {
   initializeGameState(roomId);
   const FPS = 60;
 
@@ -140,20 +148,19 @@ const startGame = (roomId: string) =>{
     io.to(roomId).emit("gameState updated", state);
   }, 1000 / FPS);
 
-
   // Separate Timer Interval
   timerInterval = setInterval(() => {
     const state = gameStates[roomId];
     if (!state) return;
 
     if (state.timeLeft <= 0) {
-      gameOver(roomId, "Time's up!")
+      gameOver(roomId, "Time's up!");
     } else {
       state.timeLeft--;
       io.to(roomId).emit("timer updated", { timeLeft: state.timeLeft });
     }
   }, 1000); // 1000 ms = 1 second
-}
+};
 
 // Websocket connections
 io.on("connection", (socket) => {
@@ -161,10 +168,10 @@ io.on("connection", (socket) => {
 
   addListenerCreateRoom(socket, gameStates, GAME_AREA, lobbyStates);
 
-  socket.on("start game", (roomId: string) =>{
-    io.in(roomId).emit("game started")
+  socket.on("start game", (roomId: string) => {
+    io.in(roomId).emit("game started");
     startGame(roomId);
-  })
+  });
 
   // Handle joining a room
   socket.on("join room", async (roomId) => {
@@ -184,7 +191,7 @@ io.on("connection", (socket) => {
     // Add the joined player to the lobby state
     const lobbyState = lobbyStates[roomId];
     lobbyState.playerTwo = socket.id;
-    lobbyState.playerReadyStatus[socket.id] = {isReady: false};
+    lobbyState.playerReadyStatus[socket.id] = { isReady: false };
 
     // Join the room
     socket.join(roomId);
@@ -223,19 +230,19 @@ io.on("connection", (socket) => {
     player.setLocation(location);
   });
 
-  socket.on("ready status changed", (roomId: string, isReady:  boolean) =>{
+  socket.on("ready status changed", (roomId: string, isReady: boolean) => {
     lobbyStates[roomId].playerReadyStatus[socket.id].isReady = isReady;
-    socket.to(roomId).emit("lobby updated", lobbyStates[roomId])
-  })
+    socket.to(roomId).emit("lobby updated", lobbyStates[roomId]);
+  });
 
   // Handle disconnect
   socket.on("disconnecting", () => {
     let rooms = Array.from(socket.rooms);
 
     // socket.rooms always contains socket ID, but we don't want it
-    rooms = rooms.filter( id => id !== socket.id);
+    rooms = rooms.filter((id) => id !== socket.id);
 
-    for (const roomId of rooms){
+    for (const roomId of rooms) {
       leaveRoom(socket, roomId);
     }
   });
