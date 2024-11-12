@@ -1,5 +1,5 @@
 import { UseLobbyContext } from '../contextProviders/LobbyContextProvider';
-import '../App.css'
+import '../Lobby.css'
 import { useEffect, useState } from 'react';
 
 
@@ -9,6 +9,13 @@ const Lobby = (
 ) =>{
     const {lobbyState, opponentId, isReady, roomId,} = UseLobbyContext();
     const [opponentReady, setOpponentReady] = useState<boolean>(false);
+    const [isCopied, setIsCopied] = useState(false)
+
+    const handleCopyRoomId = () => {
+        navigator.clipboard.writeText(roomId)
+        setIsCopied(true)
+        setTimeout(() => setIsCopied(false), 2000)
+      }
 
     useEffect(() =>{
         if (opponentId !== ''){
@@ -20,22 +27,35 @@ const Lobby = (
     [lobbyState, opponentId]);
 
     return(
-        <div className="bodyReact">
-            <div className="app">
-                <div>
-                    <h2 className="text-3xl font-bold text-blue-400">Game Lobby</h2>
-                    <p>Room ID: {roomId}</p>
+        <div className="screen-container">
+            <div className="lobby-container">
+                <div className="header-container">
+                    <h2 className="header-title">Game Lobby</h2>
+                    <div className="room-id-container">
+                        <span className="room-id">Room ID: {roomId}</span>
+                        <button className="button button-blue" onClick={handleCopyRoomId}>
+                            {isCopied ? <span>Copied!</span> : <span>Copy</span>}
+                        </button>
+                    </div>
                 </div>
 
-                <div className="space-y-4 mb-6">
+                <div className="player-list">
 
-                    <div className="flex items-center justify-between bg-gray-800 p-4 rounded-lg">
-                        <span className="text-xl text-white">{`You: ${isReady ? 'Ready' : 'Not Ready'}`}</span>
+                    <div className="player-item">
+                        <span className="player-name">You</span>
+                        <span className={`status-text ${isReady ? 'status-ready' : 'status-not-ready'}`}
+                        >
+                            {`${isReady ? 'Ready ✅' : 'Not Ready ❌'}`}
+                        </span>
                     </div>
 
                     {opponentId !== '' ?
-                        <div className="flex items-center justify-between bg-gray-800 p-4 rounded-lg">
-                            <span className="text-xl text-white">{`Opponent: ${opponentReady ? 'Ready' : 'Not Ready'}`}</span>
+                        <div className="player-item">
+                            <span className="player-name">Opponent</span>
+                            <span className={`status-text ${opponentReady ? 'status-ready' : 'status-not-ready'}`}
+                            >
+                                {`${opponentReady ? 'Ready ✅' : 'Not Ready ❌'}`}
+                            </span>
                         </div>
                         :
                         <></>
@@ -43,26 +63,23 @@ const Lobby = (
 
                 </div>
 
-                <div className="flex justify-between">
+                <div className="footer-container">
                     <button
-                    className="dynamic-button"
-                    id='exitLobby'
+                    className="button button-red"
                     onClick={exitLobby}
                     >
                     Leave Lobby
                     </button>
 
                     <button
-                    className="dynamic-button"
-                    id='toggleReady'
+                    className={`button ${isReady ? 'button-yellow' : 'button-green'}`}
                     onClick={toggleReady}
                     >
                     {isReady ? 'Cancel Ready' : 'Ready Up'}
                     </button>
 
                     <button
-                    className="dynamic-button"
-                    id='startGame'
+                    className="button button-green"
                     onClick={startGame}
                     disabled={!(isReady && opponentReady)}
                     >
