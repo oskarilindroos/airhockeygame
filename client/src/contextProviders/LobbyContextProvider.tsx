@@ -1,5 +1,5 @@
 import { createContext, useState, useContext} from "react"
-import { LobbyState } from "../../../server/src/types/LobbyState";
+import { LobbyState } from "../types/LobbyState";
 import { LobbyContextType } from "../types/LobbyContextType";
 
 const lobbyContext = createContext<LobbyContextType | undefined>(undefined);

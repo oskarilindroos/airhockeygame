@@ -1,4 +1,4 @@
-import { LobbyState } from "../../../server/src/types/LobbyState"
+import { LobbyState } from "./LobbyState"
 
 export type LobbyContextType = {
     roomId:string,
