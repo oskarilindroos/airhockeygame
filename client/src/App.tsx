@@ -49,8 +49,8 @@ export default function AirHockey() {
 
     let isMouseDown = false;
 
-    const handleMouseDown = () => {
-      isMouseDown = true;
+    const handleMouseDown = (event: MouseEvent) => {
+      isMouseDown = player.handleMouseClick(event, canvas);
     };
 
     const handleMouseUp = () => {
@@ -253,6 +253,6 @@ export default function AirHockey() {
       </div>
     </div>
 
-    
+
   );
 }
