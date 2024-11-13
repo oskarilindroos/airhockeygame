@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { io, Socket } from "socket.io-client";
 import { drawCenterCircle, drawCenterLine, drawGoals } from "./classes/graphics";
+import { PostGameScreen } from './components/PostGameScreen';
 import { Player } from "./classes/Player";
 import { Puck } from "./classes/Puck";
 import { GameState } from "./types/GameState"
@@ -292,6 +293,7 @@ export default function AirHockey() {
       <div className="app">
         {!gameStarted ? (
           <>
+          <PostGameScreen open={true} gameState={gameState} />
             <h1 id="headerText">Welcome to AirHockey!</h1>
 
             <button
