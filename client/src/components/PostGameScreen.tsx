@@ -8,6 +8,7 @@ type Props = {
     open:boolean,
     gameState: GameState|null,
     setOpen: React.Dispatch<React.SetStateAction<boolean>>
+    isPlayerOne: boolean
 }
 
 const style = {
@@ -22,9 +23,24 @@ const style = {
   p: 4,
 };
 
-export const PostGameScreen = ({open, gameState, setOpen}:Props) => {
-    const playerOneScore = gameState?.players[0].score;
-    const playerTwoScore = gameState?.players[1].score;
+export const PostGameScreen = ({open, gameState, setOpen, isPlayerOne}:Props) => {
+    const playerOneScore = gameState?.players[0].score ?? 0;
+    const playerTwoScore = gameState?.players[1].score ?? 0;
+
+    let result = '';
+
+    let scoreDifference = playerOneScore - playerTwoScore;
+    if (!isPlayerOne){
+        scoreDifference *= -1
+    }
+
+    if (scoreDifference > 0){
+        result = 'You won!'
+    } else if (scoreDifference < 0 ){
+        result = 'You lost!'
+    } else {
+        result = 'Draw!'
+    }
 
     const INITIAL_COUNTDOWN = 5
 
@@ -52,11 +68,14 @@ export const PostGameScreen = ({open, gameState, setOpen}:Props) => {
           <Typography variant="h6" component="h2">
             GAME OVER
           </Typography>
+          <Typography>
+            {result}
+          </Typography>
           <Typography sx={{ mt: 2 }}>
-            {`${playerOneScore ?? 0} - ${playerTwoScore ?? 0}`}
+            {`${playerOneScore} - ${playerTwoScore}`}
           </Typography>
           <Typography>
-            Returning to lobby in: {countdown}
+            <p>Returning to lobby in:</p> <p>{countdown}</p>
           </Typography>
         </Box>
       </Modal>

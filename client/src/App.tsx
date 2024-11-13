@@ -287,6 +287,7 @@ export default function AirHockey() {
         open={isPostGameScreenOpen}
         gameState={gameState}
         setOpen={setIsPostGameScreenOpen}
+        isPlayerOne={isPlayerOne}
       />
 
       <Lobby
