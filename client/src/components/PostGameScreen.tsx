@@ -2,10 +2,12 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
 import { GameState } from '../types/GameState';
+import { useEffect, useState } from 'react';
 
 type Props = {
     open:boolean,
-    gameState: GameState|null
+    gameState: GameState|null,
+    setOpen: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 const style = {
@@ -20,9 +22,25 @@ const style = {
   p: 4,
 };
 
-export const PostGameScreen = ({open, gameState}:Props) => {
+export const PostGameScreen = ({open, gameState, setOpen}:Props) => {
     const playerOneScore = gameState?.players[0].score;
     const playerTwoScore = gameState?.players[1].score;
+
+    const INITIAL_COUNTDOWN = 5
+
+    const [countdown, setCountdown] = useState<number>(INITIAL_COUNTDOWN);
+
+    useEffect(() => {
+        if (countdown > 0) {
+            const timer = setTimeout(() => {
+                setCountdown(prev => prev - 1);
+            }, 1000);
+            return () => clearTimeout(timer);
+        } else {
+            setOpen(false);
+        }
+    }, [countdown, setOpen]);
+
 
   return (
       <Modal
@@ -34,8 +52,11 @@ export const PostGameScreen = ({open, gameState}:Props) => {
           <Typography variant="h6" component="h2">
             GAME OVER
           </Typography>
-          <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+          <Typography sx={{ mt: 2 }}>
             {`${playerOneScore ?? 0} - ${playerTwoScore ?? 0}`}
+          </Typography>
+          <Typography>
+            Returning to lobby in: {countdown}
           </Typography>
         </Box>
       </Modal>

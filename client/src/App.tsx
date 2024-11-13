@@ -24,6 +24,7 @@ export default function AirHockey() {
 
   const [isPlayerOne, setIsPlayerOne] = useState<boolean>(false);
   const [gameStarted, setGameStarted] = useState<boolean>(false);
+  const [isPostGameScreenOpen, setIsPostGameScreenOpen] = useState<boolean>(false);
   const [timerDisplay, setTimerDisplay] = useState<string>('5:00');
   const [socket, setSocket] = useState<Socket | null>(null);
   const [gameState, setGameState] = useState<GameState | null>(null);
@@ -68,6 +69,7 @@ export default function AirHockey() {
         setIsReady(false);
         setGameStarted(false);
         setIsInLobby(true);
+        setIsPostGameScreenOpen(true);
         alert(`Game Over: ${reason}`);
         setTimerDisplay("0:00"); // Reset timer display
 
@@ -280,11 +282,19 @@ export default function AirHockey() {
 
   if(isInLobby){
     return (
-    <Lobby
-    exitLobby={leaveGameRoom}
-    toggleReady={toggleReady}
-    startGame={startGame}
-    />)
+    <>
+      <PostGameScreen
+        open={isPostGameScreenOpen}
+        gameState={gameState}
+        setOpen={setIsPostGameScreenOpen}
+      />
+
+      <Lobby
+        exitLobby={leaveGameRoom}
+        toggleReady={toggleReady}
+        startGame={startGame}
+      />
+    </>)
   }
 
 
@@ -293,9 +303,7 @@ export default function AirHockey() {
       <div className="app">
         {!gameStarted ? (
           <>
-          <PostGameScreen open={true} gameState={gameState} />
             <h1 id="headerText">Welcome to AirHockey!</h1>
-
             <button
               onClick={createGameRoom}
               id="createGame"
