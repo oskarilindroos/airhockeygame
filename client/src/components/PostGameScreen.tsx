@@ -19,11 +19,15 @@ const style = {
   transform: 'translate(-50%, -50%)',
   width: 400,
   bgcolor: 'background.paper',
+  backgroundImage: 'linear-gradient(135deg, rgba(40, 0, 77,0.75), rgba(40, 0, 77,1))',
   border: '2px solid #000',
   boxShadow: 24,
   p: 4,
   textAlign: 'center',
+  color: '#ffffff'
 };
+
+const INITIAL_COUNTDOWN = 10
 
 export const PostGameScreen = ({open, gameState, setOpen, isPlayerOne}:Props) => {
     const playerOneScore = gameState?.players[0].score ?? 0;
@@ -46,12 +50,8 @@ export const PostGameScreen = ({open, gameState, setOpen, isPlayerOne}:Props) =>
         resultTextColor = '#ff0000';
     } else {
         result = 'DRAW!';
-        resultTextColor = '#000000';
-        //resultTextColor = '#ff0000';
-        //resultTextColor = '#009933';
+        resultTextColor = '#ffffff';
     }
-
-    const INITIAL_COUNTDOWN = 999
 
     const [countdown, setCountdown] = useState<number>(INITIAL_COUNTDOWN);
 
@@ -76,10 +76,10 @@ export const PostGameScreen = ({open, gameState, setOpen, isPlayerOne}:Props) =>
           <Typography variant="h6" sx={{ my: 2, fontWeight: 'bold' }}>
             GAME OVER
           </Typography>
-          <Typography variant="h4" sx={{ my: 2, color: resultTextColor }}>
+          <Typography variant="h4" sx={{ my: 2, color: resultTextColor, fontWeight: 'bold' }}>
             {result}
           </Typography>
-          <Typography variant="h4" sx={{ my: 2 }}>
+          <Typography variant="h4" sx={{ my: 2, fontWeight: 'bold' }}>
             {`${isPlayerOne? playerOneScore : playerTwoScore}
              -
              ${isPlayerOne? playerTwoScore : playerOneScore}`}

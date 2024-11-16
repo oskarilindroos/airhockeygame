@@ -280,12 +280,6 @@ export default function AirHockey() {
     socket?.emit("start game", roomId)
   }
 
-  return(      <PostGameScreen
-    open={isPostGameScreenOpen}
-    gameState={gameState}
-    setOpen={setIsPostGameScreenOpen}
-    isPlayerOne={isPlayerOne}
-  />)
 
   if(isInLobby){
     return (
