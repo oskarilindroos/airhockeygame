@@ -24,7 +24,7 @@ export default function AirHockey() {
 
   const [isPlayerOne, setIsPlayerOne] = useState<boolean>(false);
   const [gameStarted, setGameStarted] = useState<boolean>(false);
-  const [isPostGameScreenOpen, setIsPostGameScreenOpen] = useState<boolean>(true);
+  const [isPostGameScreenOpen, setIsPostGameScreenOpen] = useState<boolean>(false);
   const [timerDisplay, setTimerDisplay] = useState<string>('5:00');
   const [socket, setSocket] = useState<Socket | null>(null);
   const [gameState, setGameState] = useState<GameState | null>(null);
@@ -234,6 +234,7 @@ export default function AirHockey() {
   };
 
   const joinGameRoom = () => {
+    setIsPlayerOne(false);
     setIsReady(false);
     if (!socket) return;
     const inputRoomId = prompt("Enter the room ID") || "";

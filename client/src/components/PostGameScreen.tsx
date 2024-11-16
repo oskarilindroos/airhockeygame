@@ -27,7 +27,7 @@ const style = {
   color: '#ffffff'
 };
 
-const INITIAL_COUNTDOWN = 10
+const INITIAL_COUNTDOWN = 5
 
 export const PostGameScreen = ({open, gameState, setOpen, isPlayerOne}:Props) => {
     const playerOneScore = gameState?.players[0].score ?? 0;
