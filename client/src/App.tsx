@@ -24,7 +24,7 @@ export default function AirHockey() {
 
   const [isPlayerOne, setIsPlayerOne] = useState<boolean>(false);
   const [gameStarted, setGameStarted] = useState<boolean>(false);
-  const [isPostGameScreenOpen, setIsPostGameScreenOpen] = useState<boolean>(false);
+  const [isPostGameScreenOpen, setIsPostGameScreenOpen] = useState<boolean>(true);
   const [timerDisplay, setTimerDisplay] = useState<string>('5:00');
   const [socket, setSocket] = useState<Socket | null>(null);
   const [gameState, setGameState] = useState<GameState | null>(null);
@@ -279,6 +279,13 @@ export default function AirHockey() {
     setIsReady(false)
     socket?.emit("start game", roomId)
   }
+
+  return(      <PostGameScreen
+    open={isPostGameScreenOpen}
+    gameState={gameState}
+    setOpen={setIsPostGameScreenOpen}
+    isPlayerOne={isPlayerOne}
+  />)
 
   if(isInLobby){
     return (

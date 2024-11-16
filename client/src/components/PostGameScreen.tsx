@@ -4,6 +4,7 @@ import Modal from '@mui/material/Modal';
 import { GameState } from '../types/GameState';
 import { useEffect, useState } from 'react';
 
+
 type Props = {
     open:boolean,
     gameState: GameState|null,
@@ -21,6 +22,7 @@ const style = {
   border: '2px solid #000',
   boxShadow: 24,
   p: 4,
+  textAlign: 'center',
 };
 
 export const PostGameScreen = ({open, gameState, setOpen, isPlayerOne}:Props) => {
@@ -34,17 +36,25 @@ export const PostGameScreen = ({open, gameState, setOpen, isPlayerOne}:Props) =>
         scoreDifference *= -1
     }
 
+    let resultTextColor :string;
+
     if (scoreDifference > 0){
-        result = 'You won!'
+        result = 'YOU WON!';
+        resultTextColor = '#009933';
     } else if (scoreDifference < 0 ){
-        result = 'You lost!'
+        result = 'YOU LOST!';
+        resultTextColor = '#ff0000';
     } else {
-        result = 'Draw!'
+        result = 'DRAW!';
+        resultTextColor = '#000000';
+        //resultTextColor = '#ff0000';
+        //resultTextColor = '#009933';
     }
 
-    const INITIAL_COUNTDOWN = 5
+    const INITIAL_COUNTDOWN = 999
 
     const [countdown, setCountdown] = useState<number>(INITIAL_COUNTDOWN);
+
 
     useEffect(() => {
         if (countdown > 0) {
@@ -61,21 +71,22 @@ export const PostGameScreen = ({open, gameState, setOpen, isPlayerOne}:Props) =>
   return (
       <Modal
         open={open}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
       >
         <Box sx={style}>
-          <Typography variant="h6" component="h2">
+          <Typography variant="h6" sx={{ my: 2, fontWeight: 'bold' }}>
             GAME OVER
           </Typography>
-          <Typography>
+          <Typography variant="h4" sx={{ my: 2, color: resultTextColor }}>
             {result}
           </Typography>
-          <Typography sx={{ mt: 2 }}>
-            {`${playerOneScore} - ${playerTwoScore}`}
+          <Typography variant="h4" sx={{ my: 2 }}>
+            {`${isPlayerOne? playerOneScore : playerTwoScore}
+             -
+             ${isPlayerOne? playerTwoScore : playerOneScore}`}
           </Typography>
           <Typography>
-            <p>Returning to lobby in:</p> <p>{countdown}</p>
+            <Typography variant='h5'>Returning to lobby in:</Typography>
+            <Typography variant='h5'>{countdown}</Typography>
           </Typography>
         </Box>
       </Modal>
