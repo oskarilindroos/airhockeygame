@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 type Props = {
     open:boolean,
     gameState: GameState|null,
-    setOpen: React.Dispatch<React.SetStateAction<boolean>>
+    returnToLobby: () => void,
     isPlayerOne: boolean
 }
 
@@ -29,7 +29,7 @@ const style = {
 
 const INITIAL_COUNTDOWN = 5
 
-export const PostGameScreen = ({open, gameState, setOpen, isPlayerOne}:Props) => {
+export const PostGameScreen = ({open, gameState, returnToLobby, isPlayerOne}:Props) => {
     const playerOneScore = gameState?.players[0].score ?? 0;
     const playerTwoScore = gameState?.players[1].score ?? 0;
 
@@ -63,9 +63,9 @@ export const PostGameScreen = ({open, gameState, setOpen, isPlayerOne}:Props) =>
             }, 1000);
             return () => clearTimeout(timer);
         } else {
-            setOpen(false);
+            returnToLobby();
         }
-    }, [countdown, setOpen]);
+    }, [countdown, returnToLobby]);
 
 
   return (

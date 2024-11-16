@@ -37,13 +37,16 @@ export default function AirHockey() {
     socket?.once("user left", (lobbyState: LobbyState, socketId: string) => {
       setOpponentId('');
       setLobbyState(lobbyState);
-      if (!gameStarted){
-        alert("Your opponent left the lobby");
-      }
       console.log(`User ${socketId} left`);
-      setIsInLobby(true);
       setIsPlayerOne(true);
     });
+  }
+
+  const returnToLobby = () => {
+    setGameStarted(false);
+    setIsInLobby(true);
+    console.log(`'in lobby' status changed to: ${isInLobby}`)
+    setIsPostGameScreenOpen(false);
   }
 
   const addLobbyListeners = () => {
@@ -63,12 +66,10 @@ export default function AirHockey() {
 
     socket?.on("game started", () =>{
       // Listen for the game over event
-      socket?.once("game over", ({ reason }: { reason: string }, lobbyState: LobbyState) => {
-
+      socket?.once("game over", ({ reason }: { reason: string }, lobbyState: LobbyState, gameState: GameState) => {
         setLobbyState(lobbyState);
+        setGameState(gameState);
         setIsReady(false);
-        setGameStarted(false);
-        setIsInLobby(true);
         setIsPostGameScreenOpen(true);
         alert(`Game Over: ${reason}`);
         setTimerDisplay("0:00"); // Reset timer display
@@ -285,13 +286,6 @@ export default function AirHockey() {
   if(isInLobby){
     return (
     <>
-      <PostGameScreen
-        open={isPostGameScreenOpen}
-        gameState={gameState}
-        setOpen={setIsPostGameScreenOpen}
-        isPlayerOne={isPlayerOne}
-      />
-
       <Lobby
         exitLobby={leaveGameRoom}
         toggleReady={toggleReady}
@@ -324,6 +318,13 @@ export default function AirHockey() {
           </>
         ) : (
           <>
+            <PostGameScreen
+              open={isPostGameScreenOpen}
+              gameState={gameState}
+              returnToLobby = {returnToLobby}
+              isPlayerOne={isPlayerOne}
+            />
+
             <p id="roomId">Room ID: {roomId}</p>
             <p id="Score">
               {gameState?.players[0]?.score ?? 0} : {gameState?.players[1]?.score ?? 0}

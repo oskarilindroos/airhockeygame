@@ -11,7 +11,7 @@ import { LobbyStates } from "./types/LobbyState";
 import { addListenerCreateRoom } from "./socketListeners/AddListenerCreateRoom";
 
 const GAME_AREA = { width: 300, height: 600 };
-const TIME_LIMIT_SEC = 300
+const TIME_LIMIT_SEC = 300;
 
 const gameStates: GameStates = {};
 const lobbyStates: LobbyStates = {};
@@ -61,11 +61,13 @@ app.get("/healthcheck", (_req, res) => {
 
 const gameOver = (roomId: string, reason: string) => {
   const lobbyState = lobbyStates[roomId];
+  const gameState = gameStates[roomId];
+
   if (lobbyState.playerTwo !== "") {
     lobbyState.playerReadyStatus[lobbyState.playerTwo].isReady = false;
   }
   lobbyState.playerReadyStatus[lobbyState.playerOne].isReady = false;
-  io.in(roomId).emit("game over", { reason: reason }, lobbyState);
+  io.in(roomId).emit("game over", { reason: reason }, lobbyState, gameState);
   clearInterval(gameInterval);
   clearInterval(timerInterval);
   delete gameStates[roomId];
@@ -75,6 +77,7 @@ const gameOver = (roomId: string, reason: string) => {
 const leaveRoom = (socket: Socket, roomId: string) => {
   const lobbyState = lobbyStates[roomId];
 
+  // Make remaining player "player" 1 or "host"
   const roomSize = io.sockets.adapter.rooms.get(roomId)?.size;
   if (socket.id === lobbyState.playerOne && roomSize === 2) {
     lobbyState.playerOne = lobbyState.playerTwo;
@@ -82,10 +85,12 @@ const leaveRoom = (socket: Socket, roomId: string) => {
 
   lobbyState.playerTwo = "";
   delete lobbyState.playerReadyStatus[socket.id];
-
   socket.to(roomId).emit("user left", lobbyState, socket.id);
 
   if (gameStates[roomId]) {
+    const players = gameStates[roomId].players;
+    players[0].score = 1;
+    players[1].score = 0;
     gameOver(roomId, "Your oppnent left the game");
   }
 };
@@ -148,8 +153,7 @@ const startGame = (roomId: string) => {
 
     // Check if socre limit is hit
     if (gameStates[roomId].players[0].score === 5 || gameStates[roomId].players[1].score === 5) {
-      io.to(roomId).emit("game over", gameStates[roomId]);
-      clearInterval(gameInterval);
+      gameOver(roomId, "Score limit reached!")
       return;
     }
 
