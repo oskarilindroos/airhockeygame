@@ -121,13 +121,21 @@ export class Puck extends GameObject {
     const sepVelVec: Vector = normal.mult(new_sepVel);
 
     //TODO newton's third law
+    //Calculate angle
     const normalTimesVel: number = (this.velocity.x * normal.x) + (this.velocity.y * normal.y);
     const normalHypot: number = Math.hypot(normal.x, normal.y);
     const velHypot: number = Math.hypot(this.velocity.x, this.velocity.y);
     let angle: number = Math.acos(normalTimesVel / (normalHypot * velHypot));
-    
-    //console.log(Math.atan2(Math.abs(normal.y) - Math.abs(this.velocity.y), Math.abs(normal.x) - Math.abs(this.velocity.x)) * 180 / Math.PI)
-    console.log(angle * (180 / Math.PI)); 
+    let thirdLaw: Vector = new Vector(0, 0);
+
+    if(isNaN(angle) == false)
+    {
+      thirdLaw.x = (Math.cos(angle) + Math.sin(angle));
+      thirdLaw.y = (Math.sin(angle) + Math.cos(angle));
+
+      this.velocity = this.velocity.add(thirdLaw);
+    }
+
 
     //Add puck velocity
     this.velocity = this.velocity.add(sepVelVec);
