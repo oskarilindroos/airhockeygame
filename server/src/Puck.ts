@@ -121,7 +121,7 @@ export class Puck extends GameObject {
     const new_sepVel: number = -sepVel;
     const sepVelVec: Vector = normal.mult(new_sepVel);
 
-    //Newton's third law (kinda)
+    //Newton's third law (kinda) Basically this takes the vector from puck center to player center, the puck's path vector and calculates the angle between them. Then it rotates puck's path vector by that angle
     //Calculate angle. This video explains: https://www.youtube.com/watch?v=dYPRYO8QhxU&t
     const normalTimesVel: number = (this.velocity.x * normal.x) + (this.velocity.y * normal.y);
     const normalHypot: number = Math.hypot(normal.x, normal.y);
@@ -139,9 +139,10 @@ export class Puck extends GameObject {
       this.velocity = thirdLaw;
     }
 
+    const stillLimit: number = 2;
     //make the standing still collision better 
-    if (player.velocity().x < 1 && player.velocity().x > -1 && player.velocity().y < 1 && player.velocity().y > -1) {
-      this.friction = 0.75;
+    if (player.velocity().x < stillLimit && player.velocity().x > -stillLimit && player.velocity().y < stillLimit && player.velocity().y > -stillLimit) {
+      this.friction = 0.6;
     }
 
     //Add puck velocity
