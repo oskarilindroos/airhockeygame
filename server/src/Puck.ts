@@ -56,13 +56,14 @@ export class Puck extends GameObject {
       this.friction = 0.2;
     }
 
-    //Add friction
-    this.velocity.x *= 1 - this.friction;
-    this.velocity.y *= 1 - this.friction;
-
     //Add velocity
     this.x = this.x + this.velocity.x;
     this.y = this.y + this.velocity.y;
+
+    //Add friction
+    this.velocity.x = this.velocity.x * (1 - this.friction);
+    this.velocity.y = this.velocity.y * (1 - this.friction);
+    
 
     //Remove friction (It's floating. Add air friction later?)
     this.friction = 0.0;
@@ -120,8 +121,8 @@ export class Puck extends GameObject {
     const new_sepVel: number = -sepVel;
     const sepVelVec: Vector = normal.mult(new_sepVel);
 
-    //TODO newton's third law
-    //Calculate angle
+    //Newton's third law (kinda)
+    //Calculate angle. This video explains: https://www.youtube.com/watch?v=dYPRYO8QhxU&t
     const normalTimesVel: number = (this.velocity.x * normal.x) + (this.velocity.y * normal.y);
     const normalHypot: number = Math.hypot(normal.x, normal.y);
     const velHypot: number = Math.hypot(this.velocity.x, this.velocity.y);
@@ -130,20 +131,21 @@ export class Puck extends GameObject {
 
     if(isNaN(angle) == false)
     {
-      thirdLaw.x = (Math.cos(angle) + Math.sin(angle));
-      thirdLaw.y = (Math.sin(angle) + Math.cos(angle));
+      //Explaining this math: https://www.youtube.com/watch?v=7j5yW5QDC2U
+      thirdLaw.x = ((Math.cos(angle)*thirdLaw.x) - (Math.sin(angle)*thirdLaw.x));
+      thirdLaw.y = ((Math.sin(angle)*thirdLaw.y) + (Math.cos(angle)*thirdLaw.y));
 
-      this.velocity = this.velocity.add(thirdLaw);
+      //In true newton's thid law, this should be added to the vector, but somehow it bugs the system, so this makes it bounce instead
+      this.velocity = thirdLaw;
     }
 
+    //make the standing still collision better 
+    if (player.velocity().x < 1 && player.velocity().x > -1 && player.velocity().y < 1 && player.velocity().y > -1) {
+      this.friction = 0.75;
+    }
 
     //Add puck velocity
     this.velocity = this.velocity.add(sepVelVec);
-
-    //Temporary fix for the "planet effect" TODO: make the standing still collision better somehow
-    if (player.velocity().x > 0.5 || player.velocity().y > 0.5) {
-      this.friction = 0.1;
-    }
   }
 
   /**

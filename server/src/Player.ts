@@ -14,6 +14,9 @@ export class Player extends GameObject {
   constructor(x: number, y: number, radius: number, color: string, id: string) {
     super(x, y, radius, color);
     this.id = id;
+    //Fixes super boost bug if you don't move the player
+    this.xPrev = x;
+    this.yPrev = y;
   }
 
   /**
