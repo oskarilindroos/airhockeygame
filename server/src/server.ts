@@ -135,16 +135,31 @@ const startGame = (roomId: string) => {
   initializeGameState(roomId);
   const FPS = 60;
 
+  //Having a cooldown on touching the puck fixes TONS of bugs. Most bugs are due to multiple collisions, because of the fast framerate
+  const COL_CD_FRAMES = 4; 
+  let colCooldown: number = COL_CD_FRAMES;
+
   // Start the game loop for the room
   gameInterval = setInterval(() => {
     const puck = gameStates[roomId].puck;
     const state = gameStates[roomId];
 
+    //Cooldown count
+    if(colCooldown < COL_CD_FRAMES)
+    {
+      colCooldown = colCooldown+1;
+    }
+
     // Puck collision detection
     for (const player of gameStates[roomId].players) {
       if (puck.playerCollisionCheck(player)) {
         puck.playerPenetrationResponse(player);
-        puck.playerCollisionResponse(player);
+        //If not on cooldown, let the velocity stuff happen
+        if(colCooldown >= COL_CD_FRAMES)
+        {
+          puck.playerCollisionResponse(player);
+          colCooldown = 0;
+        }
       }
     }
 

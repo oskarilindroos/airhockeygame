@@ -56,13 +56,14 @@ export class Puck extends GameObject {
       this.friction = 0.2;
     }
 
-    //Add friction
-    this.velocity.x *= 1 - this.friction;
-    this.velocity.y *= 1 - this.friction;
-
     //Add velocity
     this.x = this.x + this.velocity.x;
     this.y = this.y + this.velocity.y;
+
+    //Add friction
+    this.velocity.x = this.velocity.x * (1 - this.friction);
+    this.velocity.y = this.velocity.y * (1 - this.friction);
+    
 
     //Remove friction (It's floating. Add air friction later?)
     this.friction = 0.0;
@@ -120,13 +121,32 @@ export class Puck extends GameObject {
     const new_sepVel: number = -sepVel;
     const sepVelVec: Vector = normal.mult(new_sepVel);
 
+    //Newton's third law (kinda) Basically this takes the vector from puck center to player center, the puck's path vector and calculates the angle between them. Then it rotates puck's path vector by that angle
+    //Calculate angle. This video explains: https://www.youtube.com/watch?v=dYPRYO8QhxU&t
+    const normalTimesVel: number = (this.velocity.x * normal.x) + (this.velocity.y * normal.y);
+    const normalHypot: number = Math.hypot(normal.x, normal.y);
+    const velHypot: number = Math.hypot(this.velocity.x, this.velocity.y);
+    let angle: number = Math.acos(normalTimesVel / (normalHypot * velHypot));
+    let thirdLaw: Vector = new Vector(0, 0);
+
+    if(isNaN(angle) == false)
+    {
+      //Explaining this math: https://www.youtube.com/watch?v=7j5yW5QDC2U
+      thirdLaw.x = ((Math.cos(angle)*thirdLaw.x) - (Math.sin(angle)*thirdLaw.x));
+      thirdLaw.y = ((Math.sin(angle)*thirdLaw.y) + (Math.cos(angle)*thirdLaw.y));
+
+      //In true newton's thid law, this should be added to the vector, but somehow it bugs the system, so this makes it bounce instead
+      this.velocity = thirdLaw;
+    }
+
+    const stillLimit: number = 2;
+    //make the standing still collision better 
+    if (player.velocity().x < stillLimit && player.velocity().x > -stillLimit && player.velocity().y < stillLimit && player.velocity().y > -stillLimit) {
+      this.friction = 0.6;
+    }
+
     //Add puck velocity
     this.velocity = this.velocity.add(sepVelVec);
-
-    //Temporary fix for the "planet effect" TODO: make the standing still collision better somehow
-    if (player.velocity().x > 0.5 || player.velocity().y > 0.5) {
-      this.friction = 0.1;
-    }
   }
 
   /**
