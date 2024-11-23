@@ -63,8 +63,8 @@ const gameOver = (roomId: string, reason: string) => {
   const gameInterval = timers[roomId].gameInterval;
   const timerInterval = timers[roomId].timerInterval;
 
-  clearInterval(gameInterval);
-  clearInterval(timerInterval);
+  clearInterval(gameInterval ?? undefined);
+  clearInterval(timerInterval ?? undefined);
 
   const gameState = gameStates[roomId];
   const lobbyState = lobbyStates[roomId];
@@ -133,6 +133,11 @@ const initializeGameState = (roomId: string) => {
       players: [playerOne, playerTwo],
       timeLeft: TIME_LIMIT_SEC,
     };
+
+    timers[roomId] = {
+      gameInterval: null,
+      timerInterval: null
+    }
   }
 };
 
