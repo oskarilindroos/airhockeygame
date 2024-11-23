@@ -16,8 +16,6 @@ const TIME_LIMIT_SEC = 300;
 const gameStates: GameStates = {};
 const lobbyStates: LobbyStates = {};
 
-let gameInterval: NodeJS.Timeout, timerInterval: NodeJS.Timeout;
-
 // Read PORT from .env or default to 5000
 const PORT = process.env.PORT || 5000;
 
@@ -60,11 +58,15 @@ app.get("/healthcheck", (_req, res) => {
 });
 
 const gameOver = (roomId: string, reason: string) => {
-  clearInterval(gameInterval);
-  clearInterval(timerInterval);
+  const gameState = gameStates[roomId];
+
+  const gameInterval = gameState.gameInterval;
+  const timerInterval = gameState.timerInterval;
+
+  clearInterval(gameInterval ?? undefined);
+  clearInterval(timerInterval ?? undefined);
 
   const lobbyState = lobbyStates[roomId];
-  const gameState = gameStates[roomId];
 
   if (lobbyState.playerTwo !== "") {
     lobbyState.playerReadyStatus[lobbyState.playerTwo].isReady = false;
@@ -128,6 +130,8 @@ const initializeGameState = (roomId: string) => {
       puck,
       players: [playerOne, playerTwo],
       timeLeft: TIME_LIMIT_SEC,
+      gameInterval: null,
+      timerInterval: null
     };
   }
 };
@@ -141,7 +145,8 @@ const startGame = (roomId: string) => {
   let colCooldown: number = COL_CD_FRAMES;
 
   // Start the game loop for the room
-  gameInterval = setInterval(() => {
+  gameStates[roomId].gameInterval = setInterval(() => {
+
     if (!gameStates[roomId]){
       return;
     }
@@ -182,7 +187,7 @@ const startGame = (roomId: string) => {
   }, 1000 / FPS);
 
   // Separate Timer Interval
-  timerInterval = setInterval(() => {
+  gameStates[roomId].timerInterval = setInterval(() => {
     const state = gameStates[roomId];
     if (!state) return;
 

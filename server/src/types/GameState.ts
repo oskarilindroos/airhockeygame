@@ -5,6 +5,8 @@ export interface GameState {
   players: Player[];
   puck: Puck;
   timeLeft: number;
+  gameInterval: NodeJS.Timeout | null,
+  timerInterval: NodeJS.Timeout | null
 }
 
 export type GameStates = {
