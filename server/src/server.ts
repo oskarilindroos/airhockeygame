@@ -9,12 +9,14 @@ import { Player } from "./Player";
 import { GameStates } from "./types/GameState";
 import { LobbyStates } from "./types/LobbyState";
 import { addListenerCreateRoom } from "./socketListeners/AddListenerCreateRoom";
+import { Timers } from "./types/Timers";
 
 const GAME_AREA = { width: 300, height: 600 };
 const TIME_LIMIT_SEC = 300;
 
 const gameStates: GameStates = {};
 const lobbyStates: LobbyStates = {};
+const timers: Timers = {};
 
 // Read PORT from .env or default to 5000
 const PORT = process.env.PORT || 5000;
@@ -58,14 +60,13 @@ app.get("/healthcheck", (_req, res) => {
 });
 
 const gameOver = (roomId: string, reason: string) => {
+  const gameInterval = timers[roomId].gameInterval;
+  const timerInterval = timers[roomId].timerInterval;
+
+  clearInterval(gameInterval);
+  clearInterval(timerInterval);
+
   const gameState = gameStates[roomId];
-
-  const gameInterval = gameState.gameInterval;
-  const timerInterval = gameState.timerInterval;
-
-  clearInterval(gameInterval ?? undefined);
-  clearInterval(timerInterval ?? undefined);
-
   const lobbyState = lobbyStates[roomId];
 
   if (lobbyState.playerTwo !== "") {
@@ -74,6 +75,7 @@ const gameOver = (roomId: string, reason: string) => {
   lobbyState.playerReadyStatus[lobbyState.playerOne].isReady = false;
   io.in(roomId).emit("game over", { reason: reason }, lobbyState, gameState);
   delete gameStates[roomId];
+  delete timers[roomId];
 };
 
 // Handle leaving a room
@@ -130,8 +132,6 @@ const initializeGameState = (roomId: string) => {
       puck,
       players: [playerOne, playerTwo],
       timeLeft: TIME_LIMIT_SEC,
-      gameInterval: null,
-      timerInterval: null
     };
   }
 };
@@ -145,7 +145,7 @@ const startGame = (roomId: string) => {
   let colCooldown: number = COL_CD_FRAMES;
 
   // Start the game loop for the room
-  gameStates[roomId].gameInterval = setInterval(() => {
+  timers[roomId].gameInterval = setInterval(() => {
 
     if (!gameStates[roomId]){
       return;
@@ -187,7 +187,7 @@ const startGame = (roomId: string) => {
   }, 1000 / FPS);
 
   // Separate Timer Interval
-  gameStates[roomId].timerInterval = setInterval(() => {
+  timers[roomId].timerInterval = setInterval(() => {
     const state = gameStates[roomId];
     if (!state) return;
 
