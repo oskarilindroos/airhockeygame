@@ -60,6 +60,9 @@ app.get("/healthcheck", (_req, res) => {
 });
 
 const gameOver = (roomId: string, reason: string) => {
+  clearInterval(gameInterval);
+  clearInterval(timerInterval);
+
   const lobbyState = lobbyStates[roomId];
   const gameState = gameStates[roomId];
 
@@ -68,8 +71,6 @@ const gameOver = (roomId: string, reason: string) => {
   }
   lobbyState.playerReadyStatus[lobbyState.playerOne].isReady = false;
   io.in(roomId).emit("game over", { reason: reason }, lobbyState, gameState);
-  clearInterval(gameInterval);
-  clearInterval(timerInterval);
   delete gameStates[roomId];
 };
 
@@ -136,13 +137,18 @@ const startGame = (roomId: string) => {
   const FPS = 60;
 
   //Having a cooldown on touching the puck fixes TONS of bugs. Most bugs are due to multiple collisions, because of the fast framerate
-  const COL_CD_FRAMES = 4; 
+  const COL_CD_FRAMES = 4;
   let colCooldown: number = COL_CD_FRAMES;
 
   // Start the game loop for the room
   gameInterval = setInterval(() => {
-    const puck = gameStates[roomId].puck;
+    if (!gameStates[roomId]){
+      return;
+    }
+
     const state = gameStates[roomId];
+    const puck = state.puck;
+    const players = state.players;
 
     //Cooldown count
     if(colCooldown < COL_CD_FRAMES)
@@ -151,7 +157,7 @@ const startGame = (roomId: string) => {
     }
 
     // Puck collision detection
-    for (const player of gameStates[roomId].players) {
+    for (const player of players) {
       if (puck.playerCollisionCheck(player)) {
         puck.playerPenetrationResponse(player);
         //If not on cooldown, let the velocity stuff happen
@@ -164,10 +170,10 @@ const startGame = (roomId: string) => {
     }
 
     // Update puck position
-    puck.calcPosition(GAME_AREA.width, GAME_AREA.height, gameStates[roomId].players);
+    puck.calcPosition(GAME_AREA.width, GAME_AREA.height, players);
 
     // Check if socre limit is hit
-    if (gameStates[roomId].players[0].score === 5 || gameStates[roomId].players[1].score === 5) {
+    if (players[0].score === 5 || players[1].score === 5) {
       gameOver(roomId, "Score limit reached!")
       return;
     }
