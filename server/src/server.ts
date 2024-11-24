@@ -8,8 +8,8 @@ import { Puck } from "./Puck";
 import { Player } from "./Player";
 import { GameStates } from "./types/GameState";
 import { LobbyStates } from "./types/LobbyState";
-import { addListenerCreateRoom } from "./socketListeners/AddListenerCreateRoom";
 import { Timers } from "./types/Timers";
+import * as listeners from "./listeners/index"
 
 const GAME_AREA = { width: 300, height: 600 };
 const TIME_LIMIT_SEC = 300;
@@ -59,6 +59,21 @@ app.get("/healthcheck", (_req, res) => {
   res.status(200).send("OK");
 });
 
+// Websocket connections
+io.on("connection", (socket) => {
+  console.log("user connected");
+
+  socket.on("create room", () => listeners.roomEventListeners.createRoom(socket, lobbyStates));
+  socket.on("join room", (roomId: string) => listeners.roomEventListeners.joinRoom(roomId, socket, lobbyStates, io));
+  socket.on("leave room", (roomId: string) => listeners.roomEventListeners.leaveRoom(socket, roomId, lobbyStates, io, gameStates, gameOver));
+  socket.on("ready status changed", (roomId: string, isReady: boolean) => listeners.roomEventListeners.readyStatusChanged(roomId, isReady,lobbyStates, socket));
+  socket.on("disconnecting", () => listeners.roomEventListeners.disconnecting(socket, lobbyStates, io, gameStates, gameOver));
+
+  socket.on("start game", (roomId: string) => listeners.gameEventListeners.startGame(roomId, io, startGame));
+  socket.on("player move", (data) => listeners.gameEventListeners.playerMove(data, gameStates));
+
+});
+
 const gameOver = (roomId: string, reason: string) => {
   const gameInterval = timers[roomId].gameInterval;
   const timerInterval = timers[roomId].timerInterval;
@@ -76,30 +91,6 @@ const gameOver = (roomId: string, reason: string) => {
   io.in(roomId).emit("game over", { reason: reason }, lobbyState, gameState);
   delete gameStates[roomId];
   delete timers[roomId];
-};
-
-// Handle leaving a room
-const leaveRoom = (socket: Socket, roomId: string) => {
-  const lobbyState = lobbyStates[roomId];
-
-  // Make remaining player "player" 1 or "host"
-  const roomSize = io.sockets.adapter.rooms.get(roomId)?.size;
-  if (socket.id === lobbyState.playerOne && roomSize === 2) {
-    lobbyState.playerOne = lobbyState.playerTwo;
-  }
-
-  lobbyState.playerTwo = "";
-  delete lobbyState.playerReadyStatus[socket.id];
-  socket.to(roomId).emit("user left", lobbyState, socket.id);
-
-  if (gameStates[roomId]) {
-    const players = gameStates[roomId].players;
-    players[0].score = 1;
-    players[1].score = 0;
-    gameOver(roomId, "Your oppnent left the game");
-  }
-
-  socket.leave(roomId);
 };
 
 const initializeGameState = (roomId: string) => {
@@ -206,91 +197,6 @@ const startGame = (roomId: string) => {
     }
   }, 1000); // 1000 ms = 1 second
 };
-
-// Websocket connections
-io.on("connection", (socket) => {
-  console.log("user connected");
-
-  addListenerCreateRoom(socket, gameStates, GAME_AREA, lobbyStates);
-
-  socket.on("start game", (roomId: string) => {
-    io.in(roomId).emit("game started");
-    startGame(roomId);
-  });
-
-  // Handle joining a room
-  socket.on("join room", async (roomId) => {
-    // Check if room exists
-    const room = io.sockets.adapter.rooms.get(roomId);
-    if (!room) {
-      socket.emit("room not found");
-      return;
-    }
-
-    // Check if room is full
-    if (room.size >= 2) {
-      socket.emit("room full");
-      return;
-    }
-
-    // Add the joined player to the lobby state
-    const lobbyState = lobbyStates[roomId];
-    lobbyState.playerTwo = socket.id;
-    lobbyState.playerReadyStatus[socket.id] = { isReady: false };
-
-    // Join the room
-    socket.join(roomId);
-    console.log(`User ${socket.id} joined room ${roomId}`);
-
-    // Broadcast to all clients in the room that a new user has joined
-    socket.to(roomId).emit("user joined", socket.id, lobbyState);
-
-    // Emit to the client that the room has been joined
-    socket.emit("room joined", lobbyState);
-  });
-
-  socket.on("leave room", (roomId) => {
-    leaveRoom(socket, roomId);
-  });
-
-  // Handle player movement
-  socket.on("player move", (data) => {
-    const { roomId, playerId, location } = data;
-
-    if (!gameStates[roomId]) {
-      return;
-    }
-
-    // Find the player in the game state
-    const player = gameStates[roomId].players.find(
-      (player) => player.id === playerId,
-    );
-
-    if (!player) {
-      return;
-    }
-
-    // Update the player's location
-    player.setLocation(location);
-  });
-
-  socket.on("ready status changed", (roomId: string, isReady: boolean) => {
-    lobbyStates[roomId].playerReadyStatus[socket.id].isReady = isReady;
-    socket.to(roomId).emit("lobby updated", lobbyStates[roomId]);
-  });
-
-  // Handle disconnect
-  socket.on("disconnecting", () => {
-    let rooms = Array.from(socket.rooms);
-
-    // socket.rooms always contains socket ID, but we don't want it
-    rooms = rooms.filter((id) => id !== socket.id);
-
-    for (const roomId of rooms) {
-      leaveRoom(socket, roomId);
-    }
-  });
-});
 
 // Start the server
 server.listen(PORT, () => {

@@ -25,7 +25,7 @@ export const roomEventListeners = {
       console.log("Room created with ID:", roomId);
   },
 
-  disconnecting: function(socket: Socket, roomId: string, lobbyStates: LobbyStates, io: Server, gameStates: GameStates, gameOver: (roomId : string, reason: string) => void){
+  disconnecting: function(socket: Socket, lobbyStates: LobbyStates, io: Server, gameStates: GameStates, gameOver: (roomId : string, reason: string) => void){
     let rooms = Array.from(socket.rooms);
 
     // socket.rooms always contains socket ID, but we don't want it
