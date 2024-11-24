@@ -98,6 +98,8 @@ const leaveRoom = (socket: Socket, roomId: string) => {
     players[1].score = 0;
     gameOver(roomId, "Your oppnent left the game");
   }
+
+  socket.leave(roomId);
 };
 
 const initializeGameState = (roomId: string) => {
@@ -249,7 +251,6 @@ io.on("connection", (socket) => {
 
   socket.on("leave room", (roomId) => {
     leaveRoom(socket, roomId);
-    socket.leave(roomId);
   });
 
   // Handle player movement
@@ -288,10 +289,6 @@ io.on("connection", (socket) => {
     for (const roomId of rooms) {
       leaveRoom(socket, roomId);
     }
-  });
-
-  socket.on("disconnect", () => {
-    console.log("user disconnected");
   });
 });
 
