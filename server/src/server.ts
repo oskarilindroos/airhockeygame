@@ -9,14 +9,14 @@ import { Player } from "./Player";
 import { GameStates } from "./types/GameState";
 import { LobbyStates } from "./types/LobbyState";
 import { addListenerCreateRoom } from "./socketListeners/AddListenerCreateRoom";
+import { Timers } from "./types/Timers";
 
 const GAME_AREA = { width: 300, height: 600 };
 const TIME_LIMIT_SEC = 300;
 
 const gameStates: GameStates = {};
 const lobbyStates: LobbyStates = {};
-
-let gameInterval: NodeJS.Timeout, timerInterval: NodeJS.Timeout;
+const timers: Timers = {};
 
 // Read PORT from .env or default to 5000
 const PORT = process.env.PORT || 5000;
@@ -60,17 +60,22 @@ app.get("/healthcheck", (_req, res) => {
 });
 
 const gameOver = (roomId: string, reason: string) => {
-  const lobbyState = lobbyStates[roomId];
+  const gameInterval = timers[roomId].gameInterval;
+  const timerInterval = timers[roomId].timerInterval;
+
+  clearInterval(gameInterval ?? undefined);
+  clearInterval(timerInterval ?? undefined);
+
   const gameState = gameStates[roomId];
+  const lobbyState = lobbyStates[roomId];
 
   if (lobbyState.playerTwo !== "") {
     lobbyState.playerReadyStatus[lobbyState.playerTwo].isReady = false;
   }
   lobbyState.playerReadyStatus[lobbyState.playerOne].isReady = false;
   io.in(roomId).emit("game over", { reason: reason }, lobbyState, gameState);
-  clearInterval(gameInterval);
-  clearInterval(timerInterval);
   delete gameStates[roomId];
+  delete timers[roomId];
 };
 
 // Handle leaving a room
@@ -128,6 +133,11 @@ const initializeGameState = (roomId: string) => {
       players: [playerOne, playerTwo],
       timeLeft: TIME_LIMIT_SEC,
     };
+
+    timers[roomId] = {
+      gameInterval: null,
+      timerInterval: null
+    }
   }
 };
 
@@ -136,13 +146,19 @@ const startGame = (roomId: string) => {
   const FPS = 60;
 
   //Having a cooldown on touching the puck fixes TONS of bugs. Most bugs are due to multiple collisions, because of the fast framerate
-  const COL_CD_FRAMES = 4; 
+  const COL_CD_FRAMES = 4;
   let colCooldown: number = COL_CD_FRAMES;
 
   // Start the game loop for the room
-  gameInterval = setInterval(() => {
-    const puck = gameStates[roomId].puck;
+  timers[roomId].gameInterval = setInterval(() => {
+
+    if (!gameStates[roomId]){
+      return;
+    }
+
     const state = gameStates[roomId];
+    const puck = state.puck;
+    const players = state.players;
 
     //Cooldown count
     if(colCooldown < COL_CD_FRAMES)
@@ -151,7 +167,7 @@ const startGame = (roomId: string) => {
     }
 
     // Puck collision detection
-    for (const player of gameStates[roomId].players) {
+    for (const player of players) {
       if (puck.playerCollisionCheck(player)) {
         puck.playerPenetrationResponse(player);
         //If not on cooldown, let the velocity stuff happen
@@ -164,10 +180,10 @@ const startGame = (roomId: string) => {
     }
 
     // Update puck position
-    puck.calcPosition(GAME_AREA.width, GAME_AREA.height, gameStates[roomId].players);
+    puck.calcPosition(GAME_AREA.width, GAME_AREA.height, players);
 
     // Check if socre limit is hit
-    if (gameStates[roomId].players[0].score === 5 || gameStates[roomId].players[1].score === 5) {
+    if (players[0].score === 5 || players[1].score === 5) {
       gameOver(roomId, "Score limit reached!")
       return;
     }
@@ -176,7 +192,7 @@ const startGame = (roomId: string) => {
   }, 1000 / FPS);
 
   // Separate Timer Interval
-  timerInterval = setInterval(() => {
+  timers[roomId].timerInterval = setInterval(() => {
     const state = gameStates[roomId];
     if (!state) return;
 
