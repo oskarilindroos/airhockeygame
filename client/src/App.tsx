@@ -1,5 +1,7 @@
 'use client'
 import { useEffect, useRef, useState } from 'react';
+import toastr from "toastr";
+import "toastr/build/toastr.min.css";
 import { io, Socket } from "socket.io-client";
 import { drawCenterCircle, drawCenterLine, drawGoals } from "./classes/graphics";
 import { PostGameScreen } from './components/PostGameScreen';
@@ -8,6 +10,7 @@ import { Puck } from "./classes/Puck";
 import { GameState } from "./types/GameState"
 
 import Lobby from './components/Lobby';
+import GameTimer from './components/GameTimer';
 import './App.css'
 import { LobbyState} from './types/LobbyState';
 import { UseLobbyContext } from './contextProviders/LobbyContextProvider';
@@ -37,6 +40,9 @@ export default function AirHockey() {
     socket?.once("user left", (lobbyState: LobbyState, socketId: string) => {
       setOpponentId('');
       setLobbyState(lobbyState);
+      if (!gameStarted){
+        toastr.info("Your opponent left the lobby");
+      }
       console.log(`User ${socketId} left`);
       setIsPlayerOne(true);
     });
@@ -70,8 +76,10 @@ export default function AirHockey() {
         setLobbyState(lobbyState);
         setGameState(gameState);
         setIsReady(false);
+        setGameStarted(false);
+        setIsInLobby(true);
+        toastr.info(`Game Over: ${reason}`);
         setIsPostGameScreenOpen(true);
-        alert(`Game Over: ${reason}`);
         setTimerDisplay("0:00"); // Reset timer display
 
       });
@@ -245,11 +253,11 @@ export default function AirHockey() {
     socket.emit("join room", inputRoomId);
 
     socket.once("room not found", () => {
-      alert("Room not found");
+      toastr.error("Room not found");
     });
 
     socket.once("room full", () => {
-      alert("Room is full");
+      toastr.error("Room is full");
     });
 
     socket.once("room joined", (lobbyState: LobbyState) => {
@@ -329,7 +337,7 @@ export default function AirHockey() {
             <p id="Score">
               {gameState?.players[0]?.score ?? 0} : {gameState?.players[1]?.score ?? 0}
             </p>
-            <h2 id="gameTimer">{timerDisplay}</h2>
+            <GameTimer timerDisplay={timerDisplay} />
             <canvas
               ref={canvasRef}
               width={CANVAS_WIDTH}
