@@ -4,6 +4,7 @@ import toastr from "toastr";
 import "toastr/build/toastr.min.css";
 import { io, Socket } from "socket.io-client";
 import { drawCenterCircle, drawCenterLine, drawGoals } from "./classes/graphics";
+import { PostGameScreen } from './components/PostGameScreen';
 import { Player } from "./classes/Player";
 import { Puck } from "./classes/Puck";
 import { GameState } from "./types/GameState"
@@ -26,6 +27,7 @@ export default function AirHockey() {
 
   const [isPlayerOne, setIsPlayerOne] = useState<boolean>(false);
   const [gameStarted, setGameStarted] = useState<boolean>(false);
+  const [isPostGameScreenOpen, setIsPostGameScreenOpen] = useState<boolean>(false);
   const [timerDisplay, setTimerDisplay] = useState<string>('5:00');
   const [socket, setSocket] = useState<Socket | null>(null);
   const [gameState, setGameState] = useState<GameState | null>(null);
@@ -42,9 +44,15 @@ export default function AirHockey() {
         toastr.info("Your opponent left the lobby");
       }
       console.log(`User ${socketId} left`);
-      setIsInLobby(true);
       setIsPlayerOne(true);
     });
+  }
+
+  const returnToLobby = () => {
+    setGameStarted(false);
+    setIsInLobby(true);
+    console.log(`'in lobby' status changed to: ${isInLobby}`)
+    setIsPostGameScreenOpen(false);
   }
 
   const addLobbyListeners = () => {
@@ -64,13 +72,14 @@ export default function AirHockey() {
 
     socket?.on("game started", () =>{
       // Listen for the game over event
-      socket?.once("game over", ({ reason }: { reason: string }, lobbyState: LobbyState) => {
-
+      socket?.once("game over", ({ reason }: { reason: string }, lobbyState: LobbyState, gameState: GameState) => {
         setLobbyState(lobbyState);
+        setGameState(gameState);
         setIsReady(false);
         setGameStarted(false);
         setIsInLobby(true);
         toastr.info(`Game Over: ${reason}`);
+        setIsPostGameScreenOpen(true);
         setTimerDisplay("0:00"); // Reset timer display
 
       });
@@ -234,6 +243,7 @@ export default function AirHockey() {
   };
 
   const joinGameRoom = () => {
+    setIsPlayerOne(false);
     setIsReady(false);
     if (!socket) return;
     const inputRoomId = prompt("Enter the room ID") || "";
@@ -280,13 +290,16 @@ export default function AirHockey() {
     socket?.emit("start game", roomId)
   }
 
+
   if(isInLobby){
     return (
-    <Lobby
-    exitLobby={leaveGameRoom}
-    toggleReady={toggleReady}
-    startGame={startGame}
-    />)
+    <>
+      <Lobby
+        exitLobby={leaveGameRoom}
+        toggleReady={toggleReady}
+        startGame={startGame}
+      />
+    </>)
   }
 
 
@@ -296,7 +309,6 @@ export default function AirHockey() {
         {!gameStarted ? (
           <>
             <h1 id="headerText">Welcome to AirHockey!</h1>
-
             <button
               onClick={createGameRoom}
               id="createGame"
@@ -314,6 +326,13 @@ export default function AirHockey() {
           </>
         ) : (
           <>
+            <PostGameScreen
+              open={isPostGameScreenOpen}
+              gameState={gameState}
+              returnToLobby = {returnToLobby}
+              isPlayerOne={isPlayerOne}
+            />
+
             <p id="roomId">Room ID: {roomId}</p>
             <p id="Score">
               {gameState?.players[0]?.score ?? 0} : {gameState?.players[1]?.score ?? 0}
