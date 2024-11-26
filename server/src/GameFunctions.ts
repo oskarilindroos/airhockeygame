@@ -1,5 +1,4 @@
 import { Server } from "socket.io";
-import { GameArea } from "./types/GameArea";
 import { GameStates } from "./types/GameState";
 import { LobbyState, LobbyStates } from "./types/LobbyState";
 import { Puck } from "./Puck";
