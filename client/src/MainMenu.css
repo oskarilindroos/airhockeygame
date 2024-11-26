@@ -1,0 +1,125 @@
+.game-container {
+  min-height: 100vh;
+  min-width: 100vw !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: linear-gradient(to bottom right, #3730a3, #7e22ce);
+}
+
+.game-menu {
+  width: 100%;
+  max-width: 28rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  border-radius: 1.5rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  padding: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.game-title {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.game-title h1 {
+  font-size: 3rem;
+  font-weight: 800;
+  background: linear-gradient(to right, #fbbf24, #db2777);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 1rem;
+}
+
+.game-title p {
+  font-size: 1.125rem;
+  color: #bfdbfe;
+}
+
+.button-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.game-button {
+  width: 100%;
+  padding: 1.5rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: white;
+  border: none;
+  border-radius: 9999px;
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.game-button svg {
+  width: 1.75rem;
+  height: 1.75rem;
+  margin-right: 0.75rem;
+}
+
+.create-room-button {
+  background: linear-gradient(to right, #4ade80, #3b82f6);
+}
+
+.create-room-button:hover {
+  background: linear-gradient(to right, #22c55e, #2563eb);
+}
+
+.join-room-button {
+  background: linear-gradient(to right, #ec4899, #eab308);
+}
+
+.join-room-button:hover {
+  background: linear-gradient(to right, #db2777, #ca8a04);
+}
+
+.game-footer {
+  margin-top: 3rem;
+  text-align: center;
+}
+
+.game-footer p {
+  color: #bfdbfe;
+  font-size: 0.875rem;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.game-title {
+  animation: slideDown 0.5s ease-out;
+}
+
+.game-footer {
+  animation: fadeIn 0.5s ease-out;
+}
