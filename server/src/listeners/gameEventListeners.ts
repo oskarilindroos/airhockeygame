@@ -1,5 +1,8 @@
 import { Server } from "socket.io";
 import { GameStates } from "../types/GameState";
+import { gameFunctions } from "../GameFunctions";
+import { LobbyStates } from "../types/LobbyState";
+import { Timers } from "../types/Timers";
 
 export const gameEventListeners = {
     playerMove: (data: any, gameStates: GameStates) => {
@@ -22,8 +25,8 @@ export const gameEventListeners = {
         player.setLocation(location);
     },
 
-    startGame: (roomId: string, io: Server, startGameFunction: (roomId: string) => void) =>{
+    startGame: (roomId: string, io: Server, gameStates: GameStates, lobbyStates: LobbyStates, timers: Timers) =>{
         io.in(roomId).emit("game started");
-        startGameFunction(roomId);
+        gameFunctions.startGame(roomId, gameStates, lobbyStates, timers, io)
     },
 }

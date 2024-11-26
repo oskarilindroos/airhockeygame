@@ -1,15 +1,17 @@
 import { Server } from "socket.io";
 import { GameArea } from "./types/GameArea";
 import { GameStates } from "./types/GameState";
-import { LobbyStates } from "./types/LobbyState";
+import { LobbyState, LobbyStates } from "./types/LobbyState";
 import { Puck } from "./Puck";
 import { Player } from "./Player";
 import { Timers } from "./types/Timers";
 
 const TIME_LIMIT_SEC = 300;
+const FPS = 60;
+const GAME_AREA = { width: 300, height: 600 };
 
-export const GameFunctions = {
-    initializeGameState: function(roomId: string, gameStates: GameStates, GAME_AREA: GameArea, lobbyStates: LobbyStates, timers: Timers){
+export const gameFunctions = {
+    initializeGameState: function(roomId: string, gameStates: GameStates, lobbyStates: LobbyStates, timers: Timers){
         if (!gameStates[roomId]) {
             const lobbyState = lobbyStates[roomId];
             const puck = new Puck(
@@ -49,7 +51,7 @@ export const GameFunctions = {
           }
     },
 
-    gameOver: function (roomId: string, reason: string, timers: Timers, gameStates: GameStates, lobbyStates: LobbyStates, io: Server){
+    gameOver: function (roomId: string, reason: string, timers: Timers, gameStates: GameStates, lobbyState: LobbyState, io: Server){
         const gameInterval = timers[roomId].gameInterval;
         const timerInterval = timers[roomId].timerInterval;
 
@@ -57,7 +59,6 @@ export const GameFunctions = {
         clearInterval(timerInterval ?? undefined);
 
         const gameState = gameStates[roomId];
-        const lobbyState = lobbyStates[roomId];
 
         if (lobbyState.playerTwo !== "") {
           lobbyState.playerReadyStatus[lobbyState.playerTwo].isReady = false;
@@ -68,7 +69,7 @@ export const GameFunctions = {
         delete timers[roomId];
     },
 
-    mainLoop: function(gameStates: GameStates, roomId: string, GAME_AREA: GameArea, timers: Timers, lobbyStates: LobbyStates, io: Server){
+    mainLoop: function(gameStates: GameStates, roomId: string, timers: Timers, lobbyStates: LobbyStates, io: Server){
 
         if (!gameStates[roomId]){
             return;
@@ -82,9 +83,21 @@ export const GameFunctions = {
 
           // Check if socre limit is hit
           if (players[0].score === 5 || players[1].score === 5) {
-            this.gameOver(roomId, "Score limit reached!", timers, gameStates, lobbyStates, io);
+            this.gameOver(roomId, "Score limit reached!", timers, gameStates, lobbyStates[roomId], io);
             return;
           }
+
+          io.to(roomId).emit("gameState updated", state);
+    },
+
+    startGame: function(roomId: string, gameStates: GameStates, lobbyStates: LobbyStates, timers: Timers, io: Server){
+        this.initializeGameState(roomId, gameStates, lobbyStates, timers);
+
+        // Start the game loop for the room
+        timers[roomId].gameInterval = setInterval(() => {this.mainLoop(gameStates, roomId, timers, lobbyStates, io)}, 1000 / FPS);
+
+        // Separate Timer Interval
+        timers[roomId].timerInterval = setInterval(() => {this.timerLoop(gameStates, io, roomId, timers, lobbyStates)}, 1000); // 1000 ms = 1 second
     },
 
     timerLoop: function(gameStates: GameStates, io: Server, roomId: string, timers: Timers, lobbyStates: LobbyStates){
@@ -94,7 +107,7 @@ export const GameFunctions = {
           const state = gameStates[roomId];
 
           if (state.timeLeft <= 0) {
-            this.gameOver(roomId, "Time's up!", timers, gameStates, lobbyStates, io);
+            this.gameOver(roomId, "Time's up!", timers, gameStates, lobbyStates[roomId], io);
           } else {
             state.timeLeft--;
             io.to(roomId).emit("timer updated", { timeLeft: state.timeLeft });

@@ -1,18 +1,13 @@
 import express from "express";
 import morgan from "morgan";
 import { createServer } from "node:http";
-import { Server, Socket } from "socket.io";
+import { Server } from "socket.io";
 import { instrument } from "@socket.io/admin-ui";
 import cors from "cors";
-import { Puck } from "./Puck";
-import { Player } from "./Player";
 import { GameStates } from "./types/GameState";
 import { LobbyStates } from "./types/LobbyState";
 import { Timers } from "./types/Timers";
 import * as listeners from "./listeners/index"
-
-const GAME_AREA = { width: 300, height: 600 };
-const TIME_LIMIT_SEC = 300;
 
 const gameStates: GameStates = {};
 const lobbyStates: LobbyStates = {};
@@ -65,117 +60,14 @@ io.on("connection", (socket) => {
 
   socket.on("create room", () => listeners.roomEventListeners.createRoom(socket, lobbyStates));
   socket.on("join room", (roomId: string) => listeners.roomEventListeners.joinRoom(roomId, socket, lobbyStates, io));
-  socket.on("leave room", (roomId: string) => listeners.roomEventListeners.leaveRoom(socket, roomId, lobbyStates, io, gameStates, gameOver));
+  socket.on("leave room", (roomId: string) => listeners.roomEventListeners.leaveRoom(socket, roomId, lobbyStates, io, gameStates, timers));
   socket.on("ready status changed", (roomId: string, isReady: boolean) => listeners.roomEventListeners.readyStatusChanged(roomId, isReady,lobbyStates, socket));
-  socket.on("disconnecting", () => listeners.roomEventListeners.disconnecting(socket, lobbyStates, io, gameStates, gameOver));
+  socket.on("disconnecting", () => listeners.roomEventListeners.disconnecting(socket, lobbyStates, io, gameStates, timers));
 
-  socket.on("start game", (roomId: string) => listeners.gameEventListeners.startGame(roomId, io, startGame));
+  socket.on("start game", (roomId: string) => listeners.gameEventListeners.startGame(roomId, io, gameStates, lobbyStates, timers));
   socket.on("player move", (data) => listeners.gameEventListeners.playerMove(data, gameStates));
 
 });
-
-const gameOver = (roomId: string, reason: string) => {
-  const gameInterval = timers[roomId].gameInterval;
-  const timerInterval = timers[roomId].timerInterval;
-
-  clearInterval(gameInterval ?? undefined);
-  clearInterval(timerInterval ?? undefined);
-
-  const gameState = gameStates[roomId];
-  const lobbyState = lobbyStates[roomId];
-
-  if (lobbyState.playerTwo !== "") {
-    lobbyState.playerReadyStatus[lobbyState.playerTwo].isReady = false;
-  }
-  lobbyState.playerReadyStatus[lobbyState.playerOne].isReady = false;
-  io.in(roomId).emit("game over", { reason: reason }, lobbyState, gameState);
-  delete gameStates[roomId];
-  delete timers[roomId];
-};
-
-const initializeGameState = (roomId: string) => {
-  // Initialize the game state if it doesn't exist
-  if (!gameStates[roomId]) {
-    const lobbyState = lobbyStates[roomId];
-    const puck = new Puck(
-      GAME_AREA.width / 2,
-      GAME_AREA.height / 2 + 50, //Starts the game on the side of player one
-      15,
-      "black",
-    );
-
-    // NOTE: Player 1 is always the one that created the room
-    const playerOne = new Player(
-      GAME_AREA.width / 2,
-      GAME_AREA.height - 40,
-      20,
-      "green",
-      lobbyState.playerOne,
-    );
-
-    const playerTwo = new Player(
-      GAME_AREA.width / 2,
-      40,
-      20,
-      "red",
-      lobbyState.playerTwo,
-    );
-
-    gameStates[roomId] = {
-      puck,
-      players: [playerOne, playerTwo],
-      timeLeft: TIME_LIMIT_SEC,
-    };
-
-    timers[roomId] = {
-      gameInterval: null,
-      timerInterval: null
-    }
-  }
-};
-
-const startGame = (roomId: string) => {
-  initializeGameState(roomId);
-  const FPS = 60;
-
-
-
-  // Start the game loop for the room
-  timers[roomId].gameInterval = setInterval(() => {
-
-    if (!gameStates[roomId]){
-      return;
-    }
-    const state = gameStates[roomId];
-    const puck = state.puck;
-    const players = state.players;
-
-    puck.update(state, GAME_AREA);
-
-    // Check if socre limit is hit
-    if (players[0].score === 5 || players[1].score === 5) {
-      gameOver(roomId, "Score limit reached!")
-      return;
-    }
-
-    io.to(roomId).emit("gameState updated", state);
-  }, 1000 / FPS);
-
-  // Separate Timer Interval
-  timers[roomId].timerInterval = setInterval(() => {
-    if (!gameStates[roomId]){
-      return;
-    }
-    const state = gameStates[roomId];
-
-    if (state.timeLeft <= 0) {
-      gameOver(roomId, "Time's up!");
-    } else {
-      state.timeLeft--;
-      io.to(roomId).emit("timer updated", { timeLeft: state.timeLeft });
-    }
-  }, 1000); // 1000 ms = 1 second
-};
 
 // Start the server
 server.listen(PORT, () => {

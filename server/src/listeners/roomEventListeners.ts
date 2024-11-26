@@ -2,6 +2,8 @@ import { Server, Socket } from "socket.io";
 import { LobbyStates } from "../types/LobbyState";
 import { generateRandomString } from "../utils/random";
 import { GameStates } from "../types/GameState";
+import { gameFunctions } from "../GameFunctions";
+import { Timers } from "../types/Timers";
 
 export const roomEventListeners = {
   createRoom: function(socket: Socket, lobbyStates: LobbyStates) {
@@ -24,14 +26,14 @@ export const roomEventListeners = {
       console.log("Room created with ID:", roomId);
   },
 
-  disconnecting: function(socket: Socket, lobbyStates: LobbyStates, io: Server, gameStates: GameStates, gameOver: (roomId : string, reason: string) => void){
+  disconnecting: function(socket: Socket, lobbyStates: LobbyStates, io: Server, gameStates: GameStates, timers: Timers){
     let rooms = Array.from(socket.rooms);
 
     // socket.rooms always contains socket ID, but we don't want it
     rooms = rooms.filter((id) => id !== socket.id);
 
     for (const roomId of rooms) {
-      this.leaveRoom(socket, roomId, lobbyStates, io, gameStates, gameOver);
+      this.leaveRoom(socket, roomId, lobbyStates, io, gameStates, timers);
     }
 
     console.log(`user ${socket.id} disconnected`);
@@ -67,7 +69,7 @@ export const roomEventListeners = {
     socket.emit("room joined", lobbyState);
   },
 
-  leaveRoom: function(socket: Socket, roomId: string, lobbyStates: LobbyStates, io: Server, gameStates: GameStates, gameOver: (roomId : string, reason: string) => void) {
+  leaveRoom: function(socket: Socket, roomId: string, lobbyStates: LobbyStates, io: Server, gameStates: GameStates, timers: Timers) {
     const lobbyState = lobbyStates[roomId];
 
     // Make remaining player "player 1" or "host"
@@ -84,14 +86,14 @@ export const roomEventListeners = {
       const players = gameStates[roomId].players;
       players[0].score = 1;
       players[1].score = 0;
-      gameOver(roomId, "Your oppnent left the game");
+      gameFunctions.gameOver(roomId, "Your oppnent left the game", timers, gameStates, lobbyState, io);
     }
 
     socket.leave(roomId);
 
-/*     if (roomSize == 0){
+     if (roomSize == 0){
       delete lobbyStates[roomId]
-    } */
+    }
   },
 
   readyStatusChanged: function(roomId: string, isReady: boolean, lobbyStates: LobbyStates, socket: Socket){
