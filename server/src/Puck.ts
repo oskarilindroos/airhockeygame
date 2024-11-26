@@ -31,8 +31,8 @@ export class Puck extends GameObject {
 
     //Stops puck from going out of bounds top
     if (this.y - this.radius <= 0) {
-      if(this.goalCollisionCheck(areaHeight, areaWidth)) {
-        this.resetPuck(areaWidth, areaHeight, players[0]);
+      if (this.goalCollisionCheck(areaHeight, areaWidth)) {
+        this.resetPuck(areaWidth, areaHeight, players[0], true);
       } else {
         this.y = 1 + this.radius;
         this.velocity.y = -this.velocity.y;
@@ -41,9 +41,9 @@ export class Puck extends GameObject {
     }
 
     //Stops puck from going out of bounds bottom
-  if (this.y + this.radius >= areaHeight) {
-      if(this.goalCollisionCheck(areaHeight, areaWidth)) {
-        this.resetPuck(areaWidth, areaHeight, players[1]);
+    if (this.y + this.radius >= areaHeight) {
+      if (this.goalCollisionCheck(areaHeight, areaWidth)) {
+        this.resetPuck(areaWidth, areaHeight, players[1], false);
       } else {
         this.y = areaHeight - 1 - this.radius;
         this.velocity.y = -this.velocity.y;
@@ -63,7 +63,7 @@ export class Puck extends GameObject {
     //Add friction
     this.velocity.x = this.velocity.x * (1 - this.friction);
     this.velocity.y = this.velocity.y * (1 - this.friction);
-    
+
 
     //Remove friction (It's floating. Add air friction later?)
     this.friction = 0.0;
@@ -129,11 +129,10 @@ export class Puck extends GameObject {
     let angle: number = Math.acos(normalTimesVel / (normalHypot * velHypot));
     let thirdLaw: Vector = new Vector(0, 0);
 
-    if(isNaN(angle) == false)
-    {
+    if (isNaN(angle) == false) {
       //Explaining this math: https://www.youtube.com/watch?v=7j5yW5QDC2U
-      thirdLaw.x = ((Math.cos(angle)*thirdLaw.x) - (Math.sin(angle)*thirdLaw.x));
-      thirdLaw.y = ((Math.sin(angle)*thirdLaw.y) + (Math.cos(angle)*thirdLaw.y));
+      thirdLaw.x = ((Math.cos(angle) * thirdLaw.x) - (Math.sin(angle) * thirdLaw.x));
+      thirdLaw.y = ((Math.sin(angle) * thirdLaw.y) + (Math.cos(angle) * thirdLaw.y));
 
       //In true newton's thid law, this should be added to the vector, but somehow it bugs the system, so this makes it bounce instead
       this.velocity = thirdLaw;
@@ -156,7 +155,7 @@ export class Puck extends GameObject {
    * @param player
    */
   goalCollisionCheck(areaHeight: number, areaWidth: number) {
-      // Check if puck hits the top of play area and is within goal boundaries
+    // Check if puck hits the top of play area and is within goal boundaries
     if (this.y - this.radius <= 0 &&
       this.x > areaWidth / 2 - 50 &&
       this.x < areaWidth / 2 + 50) {
@@ -172,17 +171,25 @@ export class Puck extends GameObject {
     return false;
   }
 
-    /**
-   * Reset puck after player scores
-   * @param areaWidth
-   * @param areaHeight
-   * @param player
-   */
+  /**
+ * Reset puck after player scores
+ * @param areaWidth
+ * @param areaHeight
+ * @param player
+ * @param oneScored //True if player one scored, false if player two scored
+ */
 
-  resetPuck(areaWidth: number, areaHeight: number, player: Player) {
-    //Set puck position
-    this.x = areaWidth / 2;
-    this.y = areaHeight / 2
+  resetPuck(areaWidth: number, areaHeight: number, player: Player, oneScored: boolean) {
+
+    //Set puck position based on who scored
+    if (oneScored) {
+      this.x = areaWidth / 2;
+      this.y = areaHeight / 2 - 50;
+    }
+    else {
+      this.x = areaWidth / 2;
+      this.y = areaHeight / 2 + 50;
+    }
 
     //Set puck velocity
     this.velocity = new Vector(0, 0);

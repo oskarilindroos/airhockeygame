@@ -1,0 +1,14 @@
+#gameTimer {
+    font-size: 2rem;           /* Larger font size */
+    font-weight: bold;         /* Bold font for emphasis */
+    color: #000000;            /* A nice tomato color for visibility */
+    background-color: #f0f0f0; /* Light background to contrast text */
+    padding: 10px 20px;        /* Padding around text */
+    border-radius: 8px;        /* Rounded corners */
+    text-align: center;        /* Center-align the text */
+    width: fit-content;        /* Adjust width to content */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    margin: 0 auto;            /* Center horizontally if in a flex or block layout */
+    user-select: none; 
+  }
+  
