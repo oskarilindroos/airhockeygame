@@ -1,5 +1,4 @@
 import { Server } from "socket.io";
-import { Player } from "../Player";
 import { GameStates } from "../types/GameState";
 
 export const gameEventListeners = {

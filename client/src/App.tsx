@@ -51,7 +51,6 @@ export default function AirHockey() {
   const returnToLobby = () => {
     setGameStarted(false);
     setIsInLobby(true);
-    console.log(`'in lobby' status changed to: ${isInLobby}`)
     setIsPostGameScreenOpen(false);
   }
 
@@ -76,12 +75,9 @@ export default function AirHockey() {
         setLobbyState(lobbyState);
         setGameState(gameState);
         setIsReady(false);
-        setGameStarted(false);
-        setIsInLobby(true);
         toastr.info(`Game Over: ${reason}`);
         setIsPostGameScreenOpen(true);
         setTimerDisplay("0:00"); // Reset timer display
-
       });
       setGameStarted(true);
       setIsInLobby(false);

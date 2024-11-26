@@ -2,7 +2,6 @@ import { Server, Socket } from "socket.io";
 import { LobbyStates } from "../types/LobbyState";
 import { generateRandomString } from "../utils/random";
 import { GameStates } from "../types/GameState";
-import { disconnect } from "process";
 
 export const roomEventListeners = {
   createRoom: function(socket: Socket, lobbyStates: LobbyStates) {
@@ -89,6 +88,10 @@ export const roomEventListeners = {
     }
 
     socket.leave(roomId);
+
+/*     if (roomSize == 0){
+      delete lobbyStates[roomId]
+    } */
   },
 
   readyStatusChanged: function(roomId: string, isReady: boolean, lobbyStates: LobbyStates, socket: Socket){
