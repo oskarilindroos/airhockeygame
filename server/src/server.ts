@@ -4,14 +4,8 @@ import { createServer } from "node:http";
 import { Server } from "socket.io";
 import { instrument } from "@socket.io/admin-ui";
 import cors from "cors";
-import { GameStates } from "./types/GameState";
-import { LobbyStates } from "./types/LobbyState";
-import { Timers } from "./types/Timers";
 import * as listeners from "./listeners/index"
 
-const gameStates: GameStates = {};
-const lobbyStates: LobbyStates = {};
-const timers: Timers = {};
 
 // Read PORT from .env or default to 5000
 const PORT = process.env.PORT || 5000;
@@ -54,18 +48,25 @@ app.get("/healthcheck", (_req, res) => {
   res.status(200).send("OK");
 });
 
+const serverState = {
+  gameStates : {},
+  lobbyStates: {},
+  timers: {},
+  io
+}
+
 // Websocket connections
 io.on("connection", (socket) => {
   console.log("user connected");
 
-  socket.on("create room", () => listeners.roomEventListeners.createRoom(socket, lobbyStates));
-  socket.on("join room", (roomId: string) => listeners.roomEventListeners.joinRoom(roomId, socket, lobbyStates, io));
-  socket.on("leave room", (roomId: string) => listeners.roomEventListeners.leaveRoom(socket, roomId, lobbyStates, io, gameStates, timers));
-  socket.on("ready status changed", (roomId: string, isReady: boolean) => listeners.roomEventListeners.readyStatusChanged(roomId, isReady,lobbyStates, socket));
-  socket.on("disconnecting", () => listeners.roomEventListeners.disconnecting(socket, lobbyStates, io, gameStates, timers));
+  socket.on("create room", () => listeners.roomEventListeners.createRoom(socket, serverState));
+  socket.on("join room", (roomId: string) => listeners.roomEventListeners.joinRoom(roomId, socket, serverState));
+  socket.on("leave room", (roomId: string) => listeners.roomEventListeners.leaveRoom(socket, roomId, serverState));
+  socket.on("ready status changed", (roomId: string, isReady: boolean) => listeners.roomEventListeners.readyStatusChanged(roomId, isReady, serverState.lobbyStates, socket));
+  socket.on("disconnecting", () => listeners.roomEventListeners.disconnecting(socket, serverState));
 
-  socket.on("start game", (roomId: string) => listeners.gameEventListeners.startGame(roomId, io, gameStates, lobbyStates, timers));
-  socket.on("player move", (data) => listeners.gameEventListeners.playerMove(data, gameStates));
+  socket.on("start game", (roomId: string) => listeners.gameEventListeners.startGame(roomId, serverState));
+  socket.on("player move", (data) => listeners.gameEventListeners.playerMove(data, serverState.gameStates));
 
 });
 

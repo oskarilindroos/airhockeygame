@@ -4,10 +4,12 @@ import { generateRandomString } from "../utils/random";
 import { GameStates } from "../types/GameState";
 import { gameFunctions } from "../GameFunctions";
 import { Timers } from "../types/Timers";
+import { ServerState } from "../types/ServerState";
 
 export const roomEventListeners = {
-  createRoom: function(socket: Socket, lobbyStates: LobbyStates) {
+  createRoom: function(socket: Socket, serverState: ServerState) {
     // Handle creating a room
+      const {lobbyStates} = serverState;
       const roomId = generateRandomString(6); // Generate a unique room ID
 
       // Initialize lobby state
@@ -26,21 +28,22 @@ export const roomEventListeners = {
       console.log("Room created with ID:", roomId);
   },
 
-  disconnecting: function(socket: Socket, lobbyStates: LobbyStates, io: Server, gameStates: GameStates, timers: Timers){
+  disconnecting: function(socket: Socket, serverState: ServerState){
     let rooms = Array.from(socket.rooms);
 
     // socket.rooms always contains socket ID, but we don't want it
     rooms = rooms.filter((id) => id !== socket.id);
 
     for (const roomId of rooms) {
-      this.leaveRoom(socket, roomId, lobbyStates, io, gameStates, timers);
+      this.leaveRoom(socket, roomId, serverState);
     }
 
     console.log(`user ${socket.id} disconnected`);
   },
 
-  joinRoom: function(roomId: string, socket: Socket, lobbyStates: LobbyStates, io: Server) {
+  joinRoom: function(roomId: string, socket: Socket, serverState: ServerState) {
     // Check if room exists
+    const {lobbyStates, io} = serverState;
     const room = io.sockets.adapter.rooms.get(roomId);
     if (!room) {
       socket.emit("room not found");
@@ -69,7 +72,8 @@ export const roomEventListeners = {
     socket.emit("room joined", lobbyState);
   },
 
-  leaveRoom: function(socket: Socket, roomId: string, lobbyStates: LobbyStates, io: Server, gameStates: GameStates, timers: Timers) {
+  leaveRoom: function(socket: Socket, roomId: string, serverState: ServerState) {
+    const {lobbyStates, io, gameStates, timers} = serverState;
     const lobbyState = lobbyStates[roomId];
 
     // Make remaining player "player 1" or "host"
