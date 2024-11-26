@@ -138,11 +138,7 @@ const startGame = (roomId: string) => {
   initializeGameState(roomId);
   const FPS = 60;
 
-  //Having a cooldown on touching the puck fixes TONS of bugs. Most bugs are due to multiple collisions, because of the fast framerate
-  const COL_CD_FRAMES = 4;
-  let colCooldown: number = COL_CD_FRAMES;
 
-  const state = gameStates[roomId];
 
   // Start the game loop for the room
   timers[roomId].gameInterval = setInterval(() => {
@@ -150,6 +146,7 @@ const startGame = (roomId: string) => {
     if (!gameStates[roomId]){
       return;
     }
+    const state = gameStates[roomId];
     const puck = state.puck;
     const players = state.players;
 
@@ -166,7 +163,10 @@ const startGame = (roomId: string) => {
 
   // Separate Timer Interval
   timers[roomId].timerInterval = setInterval(() => {
-    if (!state) return;
+    if (!gameStates[roomId]){
+      return;
+    }
+    const state = gameStates[roomId];
 
     if (state.timeLeft <= 0) {
       gameOver(roomId, "Time's up!");

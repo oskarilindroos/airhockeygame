@@ -2,6 +2,7 @@ import { Vector } from "./Vector";
 import { Player } from "./Player";
 import { GameObject } from "./GameObject";
 import { GameState } from "./types/GameState";
+import { GameArea } from "./types/GameArea";
 
 const COL_CD_FRAMES = 4;
 
@@ -208,7 +209,7 @@ export class Puck extends GameObject {
    * @param state
    * @param GAME_AREA
    */
-  update(state: GameState, GAME_AREA: {width: number, height: number}){
+  update(state: GameState, GAME_AREA: GameArea){
     const players = state.players;
 
     //Cooldown count
