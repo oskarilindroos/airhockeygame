@@ -1,10 +1,14 @@
 import { Vector } from "./Vector";
 import { Player } from "./Player";
 import { GameObject } from "./GameObject";
+import { GameState } from "./types/GameState";
+
+const COL_CD_FRAMES = 4;
 
 export class Puck extends GameObject {
   public velocity: Vector = new Vector(0, 0);
   public friction: number = 0.0;
+  private colCooldown: number = COL_CD_FRAMES;
 
   /**
    * Calculates the location of the puck in the current frame based on velocity
@@ -139,7 +143,7 @@ export class Puck extends GameObject {
     }
 
     const stillLimit: number = 2;
-    //make the standing still collision better 
+    //make the standing still collision better
     if (player.velocity().x < stillLimit && player.velocity().x > -stillLimit && player.velocity().y < stillLimit && player.velocity().y > -stillLimit) {
       this.friction = 0.6;
     }
@@ -178,7 +182,6 @@ export class Puck extends GameObject {
  * @param player
  * @param oneScored //True if player one scored, false if player two scored
  */
-
   resetPuck(areaWidth: number, areaHeight: number, player: Player, oneScored: boolean) {
 
     //Set puck position based on who scored
@@ -198,5 +201,36 @@ export class Puck extends GameObject {
     this.friction = 0.0;
 
     player.increaseScore();
+  }
+
+  /**
+   * Puck update function called every frame
+   * @param state
+   * @param GAME_AREA
+   */
+  update(state: GameState, GAME_AREA: {width: number, height: number}){
+    const players = state.players;
+
+    //Cooldown count
+    if(this.colCooldown < COL_CD_FRAMES)
+      {
+        this.colCooldown = this.colCooldown+1;
+      }
+
+      // Puck collision detection
+      for (const player of players) {
+        if (this.playerCollisionCheck(player)) {
+          this.playerPenetrationResponse(player);
+          //If not on cooldown, let the velocity stuff happen
+          if(this.colCooldown >= COL_CD_FRAMES)
+          {
+            this.playerCollisionResponse(player);
+            this.colCooldown = 0;
+          }
+        }
+      }
+
+      // Update puck position
+      this.calcPosition(GAME_AREA.width, GAME_AREA.height, players);
   }
 }

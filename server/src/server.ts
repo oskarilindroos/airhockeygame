@@ -142,38 +142,18 @@ const startGame = (roomId: string) => {
   const COL_CD_FRAMES = 4;
   let colCooldown: number = COL_CD_FRAMES;
 
+  const state = gameStates[roomId];
+
   // Start the game loop for the room
   timers[roomId].gameInterval = setInterval(() => {
 
     if (!gameStates[roomId]){
       return;
     }
-
-    const state = gameStates[roomId];
     const puck = state.puck;
     const players = state.players;
 
-    //Cooldown count
-    if(colCooldown < COL_CD_FRAMES)
-    {
-      colCooldown = colCooldown+1;
-    }
-
-    // Puck collision detection
-    for (const player of players) {
-      if (puck.playerCollisionCheck(player)) {
-        puck.playerPenetrationResponse(player);
-        //If not on cooldown, let the velocity stuff happen
-        if(colCooldown >= COL_CD_FRAMES)
-        {
-          puck.playerCollisionResponse(player);
-          colCooldown = 0;
-        }
-      }
-    }
-
-    // Update puck position
-    puck.calcPosition(GAME_AREA.width, GAME_AREA.height, players);
+    puck.update(state, GAME_AREA);
 
     // Check if socre limit is hit
     if (players[0].score === 5 || players[1].score === 5) {
@@ -186,7 +166,6 @@ const startGame = (roomId: string) => {
 
   // Separate Timer Interval
   timers[roomId].timerInterval = setInterval(() => {
-    const state = gameStates[roomId];
     if (!state) return;
 
     if (state.timeLeft <= 0) {
