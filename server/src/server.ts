@@ -99,7 +99,7 @@ const initializeGameState = (roomId: string) => {
     const lobbyState = lobbyStates[roomId];
     const puck = new Puck(
       GAME_AREA.width / 2,
-      GAME_AREA.height / 2,
+      GAME_AREA.height / 2 + 50, //Starts the game on the side of player one
       15,
       "black",
     );
