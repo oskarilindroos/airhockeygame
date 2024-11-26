@@ -11,9 +11,7 @@ const MainMenu: React.FC<MainMenuProps> = ({ onJoinLobby, onCreateLobby }) => {
       <div className="game-menu">
         <div className="game-title">
           <h1>Air Hockey</h1>
-          <p>Fast-paced virtual matches</p>
         </div>
-
         <div className="button-container">
           <button
             className="game-button create-room-button"
