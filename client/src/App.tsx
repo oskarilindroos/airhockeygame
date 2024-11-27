@@ -348,8 +348,9 @@ export default function AirHockey() {
             />
 
             <p id="roomId">Room ID: {roomId}</p>
-            <p id="Score">{`${ownScore} : ${opponentScore}`}</p>
-            <GameTimer timerDisplay={timerDisplay} />
+            {//<p id="Score">{`${ownScore} : ${opponentScore}`}</p>
+            }
+            <GameTimer timerDisplay={timerDisplay} ownScore={ownScore} oppnentScore={opponentScore} />
             <canvas
               ref={canvasRef}
               width={CANVAS_WIDTH}
