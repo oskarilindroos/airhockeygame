@@ -3,6 +3,7 @@ import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
 import { GameState } from '../types/GameState';
 import { useEffect, useState } from 'react';
+import '../Lobby.css'
 
 
 type Props = {
@@ -84,9 +85,8 @@ export const PostGameScreen = ({open, gameState, returnToLobby, isPlayerOne}:Pro
              -
              ${isPlayerOne? playerTwoScore : playerOneScore}`}
           </Typography>
-          <Typography>
-            <Typography variant='h5'>Returning to lobby in:</Typography>
-            <Typography variant='h5'>{countdown}</Typography>
+          <Typography variant='h5'>
+            <button className='button button-green'  onClick={() => setCountdown(0)}>{`Return to lobby (${countdown})`}</button>
           </Typography>
         </Box>
       </Modal>
