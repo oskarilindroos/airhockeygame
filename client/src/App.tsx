@@ -39,6 +39,14 @@ export default function AirHockey() {
   const [showJoinLobbyModal, setShowJoinLobbyModal] = useState(false);
   const [inviteLink, setInviteLink] = useState("");
 
+  const [ownScore, setOwnScore] = useState<number>(0);
+  const [opponentScore, setOpponentScore] = useState<number>(0);
+
+  useEffect(()=>{
+    setOwnScore(isPlayerOne? gameState?.players[0].score ?? 0 : gameState?.players[1].score ?? 0);
+    setOpponentScore(isPlayerOne? gameState?.players[1].score ?? 0 : gameState?.players[0].score ?? 0);
+  },[gameState, isPlayerOne])
+
   const {
     isInLobby,
     roomId,
@@ -340,11 +348,9 @@ export default function AirHockey() {
             />
 
             <p id="roomId">Room ID: {roomId}</p>
-            <p id="Score">
-              {gameState?.players[0]?.score ?? 0} :{" "}
-              {gameState?.players[1]?.score ?? 0}
-            </p>
-            <GameTimer timerDisplay={timerDisplay} />
+            {//<p id="Score">{`${ownScore} : ${opponentScore}`}</p>
+            }
+            <GameTimer timerDisplay={timerDisplay} ownScore={ownScore} oppnentScore={opponentScore} />
             <canvas
               ref={canvasRef}
               width={CANVAS_WIDTH}
