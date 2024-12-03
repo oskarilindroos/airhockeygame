@@ -42,6 +42,7 @@ export default function AirHockey() {
   const [ownScore, setOwnScore] = useState<number>(0);
   const [opponentScore, setOpponentScore] = useState<number>(0);
 
+
   useEffect(()=>{
     setOwnScore(isPlayerOne? gameState?.players[0].score ?? 0 : gameState?.players[1].score ?? 0);
     setOpponentScore(isPlayerOne? gameState?.players[1].score ?? 0 : gameState?.players[0].score ?? 0);
@@ -92,8 +93,11 @@ export default function AirHockey() {
     });
 
     socket?.on("game started", () => {
-      // Listen for the game over event
 
+      // Scroll to the bottom of the screen on game start
+      window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+
+      // Listen for the game over event
       socket?.once("game over", ({ reason }: { reason: string }, lobbyState: LobbyState, gameState: GameState) => {
         setLobbyState(lobbyState);
         setGameState(gameState);
