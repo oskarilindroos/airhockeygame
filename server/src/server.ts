@@ -4,12 +4,10 @@ import { createServer } from "node:http";
 import { Server } from "socket.io";
 import { instrument } from "@socket.io/admin-ui";
 import cors from "cors";
-import * as listeners from "./listeners/index"
-
+import * as listeners from "./listeners/index";
 
 // Read PORT from .env or default to 5000
 const PORT = process.env.PORT || 5000;
-
 
 // CORS origins must be set
 if (process.env.CORS_ORIGINS === undefined) {
@@ -30,11 +28,7 @@ const io = new Server(server, {
 
 // Enable the admin UI for socket.io
 instrument(io, {
-  auth: {
-    type: "basic",
-    username: process.env.SOCKET_IO_USERNAME!,
-    password: process.env.SOCKET_IO_PASSWORD!,
-  },
+  auth: false,
   mode: process.env.NODE_ENV === "production" ? "production" : "development",
 });
 
@@ -49,25 +43,43 @@ app.get("/healthcheck", (_req, res) => {
 });
 
 const serverState = {
-  gameStates : {},
+  gameStates: {},
   lobbyStates: {},
   timers: {},
-  io
-}
+  io,
+};
 
 // Websocket connections
 io.on("connection", (socket) => {
   console.log("user connected");
 
-  socket.on("create room", () => listeners.roomEventListeners.createRoom(socket, serverState));
-  socket.on("join room", (roomId: string) => listeners.roomEventListeners.joinRoom(roomId, socket, serverState));
-  socket.on("leave room", (roomId: string) => listeners.roomEventListeners.leaveRoom(socket, roomId, serverState));
-  socket.on("ready status changed", (roomId: string, isReady: boolean) => listeners.roomEventListeners.readyStatusChanged(roomId, isReady, serverState.lobbyStates, socket));
-  socket.on("disconnecting", () => listeners.roomEventListeners.disconnecting(socket, serverState));
+  socket.on("create room", () =>
+    listeners.roomEventListeners.createRoom(socket, serverState),
+  );
+  socket.on("join room", (roomId: string) =>
+    listeners.roomEventListeners.joinRoom(roomId, socket, serverState),
+  );
+  socket.on("leave room", (roomId: string) =>
+    listeners.roomEventListeners.leaveRoom(socket, roomId, serverState),
+  );
+  socket.on("ready status changed", (roomId: string, isReady: boolean) =>
+    listeners.roomEventListeners.readyStatusChanged(
+      roomId,
+      isReady,
+      serverState.lobbyStates,
+      socket,
+    ),
+  );
+  socket.on("disconnecting", () =>
+    listeners.roomEventListeners.disconnecting(socket, serverState),
+  );
 
-  socket.on("start game", (roomId: string) => listeners.gameEventListeners.startGame(roomId, serverState));
-  socket.on("player move", (data) => listeners.gameEventListeners.playerMove(data, serverState.gameStates));
-
+  socket.on("start game", (roomId: string) =>
+    listeners.gameEventListeners.startGame(roomId, serverState),
+  );
+  socket.on("player move", (data) =>
+    listeners.gameEventListeners.playerMove(data, serverState.gameStates),
+  );
 });
 
 // Start the server
