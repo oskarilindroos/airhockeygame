@@ -160,25 +160,29 @@ export default function AirHockey() {
 
     // NOTE: Touch events simulate mouse events
     const handleTouchStart = () => {
-      isMouseDown = true;
-      canvas.dispatchEvent(new MouseEvent("mousedown"));
+      isMouseDown = true; // Set isMouseDown to true on touchstart
+      console.log("Touchstart: isMouseDown set to true");
     };
 
     const handleTouchEnd = () => {
-      isMouseDown = false;
-      canvas.dispatchEvent(new MouseEvent("mouseup"));
+      isMouseDown = false; // Reset isMouseDown to false on touchend
+      console.log("Touchend: isMouseDown set to false");
     };
 
     const handleTouchMove = (event: TouchEvent) => {
       player.handleTouchMove(event, canvas, isMouseDown);
     };
 
+
+
+
     canvas.addEventListener("mousedown", handleMouseDown);
     canvas.addEventListener("mouseup", handleMouseUp);
     canvas.addEventListener("mousemove", handleMouseMove);
     canvas.addEventListener("touchstart", handleTouchStart);
     canvas.addEventListener("touchend", handleTouchEnd);
-    canvas.addEventListener("touchmove", handleTouchMove);
+    //canvas.addEventListener("touchmove", handleTouchMove);
+    canvas.addEventListener("touchmove", handleTouchMove, { passive: false });
 
     // Listen for game state updates from the server
     socket.on("gameState updated", (data: GameState) => {
