@@ -30,11 +30,7 @@ const io = new Server(server, {
 
 // Enable the admin UI for socket.io
 instrument(io, {
-  auth: {
-    type: "basic",
-    username: process.env.SOCKET_IO_USERNAME!,
-    password: process.env.SOCKET_IO_PASSWORD!,
-  },
+  auth: false,
   mode: process.env.NODE_ENV === "production" ? "production" : "development",
 });
 
